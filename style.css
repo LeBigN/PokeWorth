@@ -22,10 +22,10 @@
   /* petits éléments en verre (pastilles J-xx, bouton +) */
   --pill-bg:radial-gradient(120% 90% at 22% -18%,rgba(255,255,255,.28),rgba(255,255,255,0) 50%),rgba(255,255,255,.04);
   --pill-sh:inset 0 5px 7px -6px rgba(255,255,255,.6),inset 0 0 10px rgba(255,255,255,.06);
-  /* boutons Liquid Glass « Ultra Clear » (choisi le 05/10/2026) */
-  --uc-blur:3px; --uc-sat:180%; --uc-fill:.015; --uc-tint:150,118,255; --uc-tint-a:.04;
-  --btn-r:14px; --btn-r-sm:12px; /* boutons rectangulaires à coins arrondis */
-  --uc-rim:.38; --uc-spec:.85; --uc-glow:0; --uc-glow-r:0px; --uc-drop:.3;
+  /* boutons Liquid Glass « Subtle Glass » */
+  --uc-blur:14px; --uc-sat:140%; --uc-fill:.07; --uc-tint:150,118,255; --uc-tint-a:.10;
+  --btn-r:999px; --btn-r-sm:999px; /* boutons arrondis en pilule, comme la barre d'onglets de l'app */
+  --uc-rim:.22; --uc-spec:.55; --uc-glow:0; --uc-glow-r:0px; --uc-drop:.45;
 }
 
 /* ---------- base ---------- */
@@ -58,12 +58,12 @@ section{padding:26px 0}
 .note,.soon{font-size:14px;color:var(--dim)}
 .note{margin-top:12px}
 
-/* ---------- navigation : barre flottante centrée, rectangle à coins arrondis comme les boutons ---------- */
+/* ---------- navigation : barre flottante centrée, en pilule comme la barre d'onglets de l'app ---------- */
 header.nav{position:sticky;top:10px;z-index:10;pointer-events:none}
 .nav .wrap{
   display:flex;align-items:center;justify-content:center;
   width:fit-content;max-width:calc(100% - 24px);height:50px;margin:10px auto 0;padding:0 6px 0 8px;
-  border-radius:calc(var(--btn-r) + 4px);pointer-events:auto}
+  border-radius:var(--btn-r);pointer-events:auto}
 .nav nav{display:flex;justify-content:center;flex-wrap:nowrap;gap:2px}
 .nav nav a{position:relative;color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:6px 13px;border-radius:var(--btn-r-sm);transition:background .2s,color .2s}
 .nav nav a::after{content:"";position:absolute;inset:-8px -2px} /* zone tactile >= 44 px */
@@ -122,7 +122,7 @@ header.nav{position:sticky;top:10px;z-index:10;pointer-events:none}
 .plan li::before{content:"";position:absolute;left:2px;top:.55em;width:14px;height:8px;border-left:2.2px solid var(--acc);border-bottom:2.2px solid var(--acc);transform:rotate(-45deg) translateY(-50%)}
 .card.plan.pro{background:radial-gradient(130% 90% at 0% 0%,rgba(255,255,255,.40),rgba(255,255,255,0) 52%),linear-gradient(150deg,rgba(176,132,255,.62),rgba(88,40,200,.56))}
 
-/* ---------- boutons Liquid Glass « Ultra Clear » ----------
+/* ---------- boutons Liquid Glass « Subtle Glass » ----------
    .cta (principal ; .ghost = secondaire) · .filters button · liens retour · .serie-link · .more-news · réseaux sociaux · barre du haut */
 .cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;margin-top:24px;padding:13px 26px;border-radius:var(--btn-r);font-weight:700;font-size:17px;text-decoration:none}
 .cta img.wa{width:22px;height:22px;margin:0 2px 0 0;flex:none}
@@ -175,7 +175,9 @@ header.nav{position:sticky;top:10px;z-index:10;pointer-events:none}
 .cta:active,.filters button:active,.crumb a:active,.crumb-bottom a:active,.serie-link:active,.more-news:active,a.sb:active{transform:scale(.96);transition-duration:.12s}
 .cta:focus-visible,.filters button:focus-visible,.crumb a:focus-visible,.crumb-bottom a:focus-visible,.serie-link:focus-visible,.more-news:focus-visible,a.sb:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:var(--btn-r)}
 /* barre du haut : même verre, plus de flou pour rester lisible au-dessus du contenu qui défile */
-.nav .wrap{--f:.04;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+.nav .wrap{--f:.07;-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
+/* lien actif : pastille plus sombre et translucide, comme l'onglet sélectionné de l'app */
+.nav nav a[aria-current]{background:linear-gradient(180deg,rgba(14,8,40,.34),rgba(14,8,40,.2));-webkit-backdrop-filter:blur(6px) saturate(160%);backdrop-filter:blur(6px) saturate(160%);box-shadow:inset 0 1px 3px rgba(8,3,24,.45),inset 0 -1px 1px rgba(255,255,255,.14),0 0 0 1px rgba(255,255,255,.1)}
 
 /* ---------- pages de contenu (support, légal) ---------- */
 .doc{padding:34px 0 20px}
