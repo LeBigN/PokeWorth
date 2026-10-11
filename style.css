@@ -524,3 +524,167 @@ a.cat-serie:hover{box-shadow:0 0 0 1px var(--acc)}
 .wa-soon p.wa-sub{font-size:18px;font-weight:500;letter-spacing:0;color:var(--muted)}
 /* tableau des formules dans les CGU */
 .tbl table{min-width:420px}
+
+/* v11.0 · Web App : catalogue de cartes, collection, valeur (mêmes tokens, mêmes verres et boutons que le reste du site) */
+.wp{padding:18px 0 56px}
+.wp.wrap{width:min(1180px,100% - 32px)}
+.wp-top0{text-align:center;margin:8px 0 6px}
+.wp-top0 h1{margin:6px auto 8px;font-size:clamp(30px,5vw,46px);max-width:none}
+.wp-top0 .sub{margin:0 auto 14px}
+.wp-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin:10px 0 20px;justify-content:center}
+.wp-tabs::-webkit-scrollbar{display:none}
+.wp-tabs a{color:var(--muted);text-decoration:none;font:700 16px/1 Nunito,system-ui,sans-serif;padding:14px 16px;border-bottom:2px solid transparent;white-space:nowrap}
+.wp-tabs a:hover{color:#fff}
+.wp-tabs a[aria-current="page"]{color:#fff;border-bottom-color:var(--acc)}
+.wp-tabs a:focus-visible{outline:2px solid #fff;outline-offset:-2px;border-radius:10px}
+.wp-n{margin-left:6px;font-size:11px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:999px;padding:2px 7px}
+.wp-n:empty{display:none}
+#wp-banner{background:rgba(255,190,90,.14);border:1px solid rgba(255,190,90,.4);border-radius:16px;padding:12px 16px;margin:0 0 16px;font-size:14.5px}
+.wp-h{font-size:clamp(20px,2.6vw,25px);margin:22px 0 12px}
+h3.wp-h{margin-top:26px}
+.wp-f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;color:var(--dim);min-width:0}
+.wp-f span{padding-left:4px}
+.wp-f input,.wp-f select,.wp-search input{font:500 16px Nunito,system-ui,sans-serif;color:#fff;background:rgba(10,4,30,.5);border:1px solid var(--line);border-radius:14px;padding:11px 14px;min-height:46px;min-width:0;width:100%}
+.wp-f select{padding-right:8px}
+.wp-f select option{color:#1a0a35}
+.wp-f input:focus-visible,.wp-f select:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.wp-grow{flex:1 1 260px}
+.wp-search{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding:18px}
+.wp-search .cta{margin:0;min-height:46px;padding:10px 24px}
+.wp-sf{max-width:420px;margin-bottom:10px}
+.wp-serie{margin:6px 0 10px}
+.wp-serie h3{font-size:19px;margin:14px 0 10px;color:var(--acc)}
+.wp-sets{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr))}
+.wp-set{padding:14px;display:flex;flex-direction:column;gap:3px;text-decoration:none;color:inherit;border-radius:22px}
+.wp-set:hover{box-shadow:var(--card-rim),0 0 0 1px var(--acc)}
+.wp-set img{height:54px;width:100%;object-fit:contain;margin-bottom:6px}
+.wp-set b{font-size:15.5px;line-height:1.25}
+.wp-set span{font-size:13px;color:var(--dim)}
+.wp-set small{font-size:12.5px;color:var(--acc);font-weight:700}
+.wp-prog{display:block;height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin:6px 0 2px}
+.wp-prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#9b7bff,#d3c0ff)}
+.wp-prog.big{height:10px;margin:12px 0 8px}
+.wp-grid{display:grid;gap:14px 12px;grid-template-columns:repeat(auto-fill,minmax(min(150px,45%),1fr))}
+.wp-tile{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0}
+.wp-card{display:block;aspect-ratio:245/337;border-radius:12px;overflow:hidden;background:rgba(10,4,30,.5);box-shadow:0 10px 24px -12px rgba(4,1,14,.8);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.wp-card:hover{transform:translateY(-3px)}
+.wp-card:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.wp-card img{width:100%;height:100%;object-fit:cover;display:block}
+.wp-miss .wp-card img{filter:grayscale(1) brightness(.6);opacity:.6}
+.wp-miss .wp-card:hover img{filter:none;opacity:1}
+.wp-noimg{display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;height:100%;color:var(--dim);font-size:14px}
+.wp-noimg.big{aspect-ratio:600/825;border-radius:18px;background:rgba(10,4,30,.5)}
+.wp-cap{display:flex;flex-direction:column;gap:1px;font-size:13px;line-height:1.3;min-width:0}
+.wp-cap b{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-cap span{color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-pr{color:#fff;font-weight:700}
+.wp-q{position:absolute;top:6px;left:6px;background:rgba(20,8,48,.82);border:1px solid rgba(255,255,255,.3);color:#fff;font-weight:700;font-size:13px;padding:2px 9px;border-radius:99px}
+.wp-add{position:absolute;top:6px;right:6px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(20,8,48,.82);color:#fff;font:700 26px/1 Nunito,system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 0 3px;opacity:.95;transition:transform .2s,background .2s}
+.wp-add:hover{background:rgba(120,80,230,.9);transform:scale(1.06)}
+.wp-add.ok{background:rgba(70,190,130,.9);font-size:20px}
+.wp-add:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (hover:hover){.wp-add{opacity:0}.wp-tile:hover .wp-add,.wp-add:focus-visible{opacity:1}}
+.wp-skel{aspect-ratio:245/380;border-radius:12px;background:linear-gradient(100deg,rgba(255,255,255,.05) 30%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.05) 70%) 0 0/200% 100%;animation:wpsk 1.3s linear infinite}
+@keyframes wpsk{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.wp-skel{animation:none}.wp-card{transition:none}}
+.wp-pager{display:flex;gap:14px;align-items:center;justify-content:center;margin:22px 0 4px;flex-wrap:wrap;color:var(--dim)}
+.wp-pager .cta{margin-top:0}
+.wp-crumb{margin:2px 0 14px}
+.wp-crumb a{color:var(--acc);font-weight:700;text-decoration:none}
+.wp-sethead{display:flex;gap:24px;align-items:center;margin-bottom:14px}
+.wp-sethead>img{max-width:200px;max-height:90px;object-fit:contain;flex:none}
+.wp-sethead>div{flex:1;min-width:0}
+.wp-sethead h2{margin:0 0 2px}
+.wp-filters{align-items:center;margin:8px 0 14px}
+.wp-filters .wp-f{flex:1 1 220px}
+.wp-msg{text-align:center;padding:28px 22px;margin:14px 0}
+.wp-msg p{margin:6px auto;max-width:56ch;text-wrap:balance}
+.wp-msg .cta{margin-top:12px}
+.wp-warn{background:rgba(255,190,90,.12)}
+.wp-detail{display:grid;gap:28px;grid-template-columns:minmax(220px,380px) 1fr;align-items:start}
+.wp-art img{width:100%;height:auto;border-radius:20px;box-shadow:0 24px 50px -18px rgba(4,1,14,.85);display:block}
+.wp-info h2{margin:0;font-size:clamp(26px,4vw,38px)}
+.wp-info>.card,.wp-info>form{margin-top:14px}
+.wp-sub2{color:var(--muted);margin:2px 0 14px}
+.wp-actions{display:flex;gap:10px;flex-wrap:wrap}
+.wp-actions .cta{margin-top:0}
+.wp-lots{list-style:none;margin:8px 0}
+.wp-lot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.wp-lbtn{display:flex;gap:14px}
+.wp-link{background:none;border:0;color:var(--acc);font:700 14.5px Nunito,system-ui,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:6px 0;min-height:32px}
+.wp-link:hover{color:#fff}
+.wp-fg{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:12px 0}
+.wp-addf .cta{margin-top:4px}
+.wp-dl{display:grid;gap:10px 18px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:8px}
+.wp-dl dt{font-size:12.5px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px}
+.wp-dl dd{font-size:15.5px}
+.wp-two{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));margin:14px 0}
+.wp-two .card,.wp-prices>.card{padding:20px}
+.wp-prices h4,.wp-two h4,.card h4{font-size:17px;margin:0 0 8px}
+.wp-prices h4 small{color:var(--acc)}
+.wp-t{width:100%;border-collapse:collapse;font-size:15.5px}
+.wp-t th,.wp-t td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;font-weight:500}
+.wp-t th[scope=row]{color:var(--body)}
+.wp-t td{text-align:right;font-weight:700}
+.wp-list th{font-size:12.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--dim);white-space:nowrap}
+.wp-list td,.wp-list th{text-align:left}
+.wp-list .r{text-align:right}
+.wp-list{min-width:760px}
+.wp-th{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;min-width:180px}
+.wp-th img{border-radius:4px;flex:none}
+.wp-dup{font-size:11px;font-weight:700;color:var(--acc);border:1px solid var(--line);border-radius:99px;padding:1px 7px}
+.wp-pos{color:#7be0a8}.wp-neg{color:#ff9a9a}
+.wp-vars{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+.wp-var{font-size:13.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.08)}
+.wp-var small{font-weight:600;color:var(--dim);margin-left:3px}
+.wp-var.up{color:#7be0a8}.wp-var.down{color:#ff9a9a}.wp-var.flat{color:var(--body)}
+.wp-chart{width:100%;height:auto;display:block;margin:6px 0}
+.wp-chart text{fill:rgba(255,255,255,.7);font:600 11.5px Nunito,system-ui,sans-serif}
+.wp-chart .wp-gl{stroke:rgba(255,255,255,.12);stroke-width:1}
+.wp-chart .wp-ln{fill:none;stroke:#c9b0ff;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.wp-chart circle{fill:#fff;stroke:#8b5cf6;stroke-width:2}
+.wp-pagehead{display:flex;gap:16px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;margin:4px 0 6px}
+.wp-pagehead h2{margin:0}
+.wp-pagehead .sub{margin:4px 0 0}
+.wp-hbtn{display:flex;gap:10px;flex-wrap:wrap}
+.wp-hbtn .cta{margin:0;padding:10px 20px;font-size:15.5px}
+.cta[disabled]{opacity:.5;cursor:not-allowed}
+.wp-last{margin:2px 0 8px}
+.wp-progmsg{min-height:22px;font-size:14.5px;color:var(--acc);margin-bottom:6px}
+.wp-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:16px;margin:14px 0 8px}
+.wp-tools .wp-f{flex:1 1 150px}
+.wp-tools .wp-grow{flex:2 1 260px}
+.wp-tools .filters{margin:0}
+.wp-chk{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;min-height:46px;cursor:pointer}
+.wp-chk input{width:20px;height:20px;accent-color:#9b7bff}
+.wp-toprow{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(140px,40%),1fr))}
+.wp-kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));margin:16px 0}
+.wp-kpi{padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+.wp-kpi span{font-size:13px;color:var(--dim);font-weight:700}
+.wp-kpi b{font-size:clamp(22px,3vw,30px);letter-spacing:-.5px;line-height:1.15}
+.wp-kpi small{font-size:12.5px;color:var(--dim)}
+.wp-bar{display:grid;grid-template-columns:minmax(80px,1.1fr) 2fr auto;gap:10px;align-items:center;font-size:14px;margin:8px 0}
+.wp-bl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-bt{height:9px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.wp-bt i{display:block;height:100%;background:linear-gradient(90deg,#9b7bff,#d3c0ff);border-radius:99px}
+.wp-bv{color:var(--body);font-weight:700;white-space:nowrap;font-size:13px}
+.wp-rank{list-style:none;margin:6px 0}
+.wp-rank li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 0;border-top:1px solid var(--line);align-items:center}
+.wp-rank li a{color:#fff;font-weight:700;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-rank li span{grid-column:1;color:var(--dim);font-size:13px}
+.wp-rank li b{grid-column:2;grid-row:1/3;text-align:right}
+.wp-pl{display:grid;grid-template-columns:minmax(90px,1.2fr) 2fr auto;gap:10px;align-items:center;text-decoration:none;color:var(--body);font-size:14px;padding:5px 0}
+.wp-pl .wp-prog{margin:0}
+.wp-pl:hover{color:#fff}
+.wp-wrap{position:relative;display:flex;flex-direction:column}
+.wp-rm{align-self:flex-start}
+.wp-ltbl{margin-top:8px}
+@media (max-width:760px){
+  .wp-detail{grid-template-columns:1fr}
+  .wp-art{max-width:300px;margin:0 auto}
+  .wp-sethead{flex-direction:column;align-items:flex-start;gap:12px}
+  .wp-tabs{justify-content:flex-start}
+  .wp-tabs a{padding:13px 13px;font-size:15px}
+  .wp-add{opacity:.95!important}
+}
+.wp-foot{margin-top:30px;text-align:center;max-width:80ch;margin-inline:auto;text-wrap:balance}
