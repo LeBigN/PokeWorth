@@ -18,7 +18,8 @@ const fU = v => (v == null || isNaN(v)) ? '—' : USD.format(v);
 const fD = t => { try { return new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return '—'; } };
 const fDT = t => { try { return new Date(t).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return '—'; } };
 const day = (t = Date.now()) => new Date(t).toISOString().slice(0, 10);
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const num = v => { const n = typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : null; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -78,7 +79,7 @@ const imgUrl = (base, q = 'low') => base ? (/\.(webp|png|jpg)$/.test(base) ? bas
 const logoUrl = base => base ? (/\.(webp|png|jpg)$/.test(base) ? base : base + '.webp') : '';
 
 /* ------------------------------------------------------------------ stockage local */
-const DEF = () => ({ v: 1, lang: 'fr', view: 'grid', lots: [], cards: {}, wish: [], snaps: {}, totals: [], lastRefresh: null });
+const DEF = () => ({ v: 1, lang: 'fr', view: 'grid', lots: [], cards: {}, wish: [], snaps: {}, totals: [], lastRefresh: null, sh: null, legacyDone: false });
 let S = DEF();
 let persist = 'idb';
 const IDB = {
@@ -96,27 +97,40 @@ const IDB = {
   get(k) { return new Promise((res, rej) => { const q = IDB.db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
   set(k, v) { return new Promise((res, rej) => { const t = IDB.db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
 };
+/* Sans compte (ou connexion non configurée) : clé « state » = mode local historique, jamais modifiée par la connexion.
+   Avec compte : « state:<id> » = cache de cet utilisateur (la source de vérité de la collection est le serveur). */
+let cloud = null, guest = false;
+const skey = () => cloud ? 'state:' + cloud.u.id : 'state';
+const lskey = () => cloud ? 'pw_state:' + cloud.u.id : 'pw_state';
+async function readKey(k) {
+  if (persist === 'idb') { try { return await IDB.get(k); } catch (e) { return null; } }
+  try { return JSON.parse(localStorage.getItem('pw_' + k) || 'null'); } catch (e) { return null; }
+}
 async function load() {
   let d = null;
-  try { await IDB.open(); d = await IDB.get('state'); }
+  try { await IDB.open(); d = await IDB.get(skey()); }
   catch (e) {
     persist = 'ls';
-    try { d = JSON.parse(localStorage.getItem('pw_state') || 'null'); } catch (e2) { persist = 'none'; }
+    try { d = JSON.parse(localStorage.getItem(lskey()) || 'null'); } catch (e2) { persist = 'none'; }
   }
   if (d && typeof d === 'object') S = Object.assign(DEF(), d);
+}
+function writeNow() {
+  try {
+    if (persist === 'idb' && IDB.db) return IDB.set(skey(), S);
+    if (persist === 'ls') localStorage.setItem(lskey(), JSON.stringify(S));
+  } catch (e) { /* rien */ }
 }
 let saveT = null, ver = 0;
 function save() {
   ver++; aggCache = null;
   clearTimeout(saveT);
   saveT = setTimeout(async () => {
-    try {
-      if (persist === 'idb') await IDB.set('state', S);
-      else if (persist === 'ls') localStorage.setItem('pw_state', JSON.stringify(S));
-    } catch (e) { persist = 'none'; banner(); }
+    try { await writeNow(); } catch (e) { persist = 'none'; banner(); }
   }, 250);
+  if (cloud) schedSync();
 }
-addEventListener('pagehide', () => { if (persist === 'idb' && IDB.db) { try { IDB.set('state', S); } catch (e) { /* rien */ } } else if (persist === 'ls') { try { localStorage.setItem('pw_state', JSON.stringify(S)); } catch (e) { /* rien */ } } });
+addEventListener('pagehide', () => { writeNow(); });
 
 /* ------------------------------------------------------------------ calculs de prix et de collection */
 function cmPrice(card, finish) {
@@ -216,6 +230,126 @@ function finishesOf(c) {
   ['normal', 'reverse', 'holo', 'firstEdition'].forEach(k => { if (v[k]) o.push(k); });
   return o.length ? o : ['normal'];
 }
+
+/* ------------------------------------------------------------------ compte et synchronisation (Supabase)
+   Les droits sont appliqués par la base : chaque requête part avec la session de l'utilisateur, et les règles RLS
+   n'autorisent que ses propres lignes. Ici : copie locale (cache hors ligne) + envoi des différences. */
+const lotSig = l => [l.cardId, l.qty, l.lang, l.finish, l.cond, l.price == null ? '' : l.price, l.date || ''].join('|');
+const rowSig = r => [r.card_id, r.qty, r.lang, r.finish, r.condition, r.price_paid == null ? '' : Number(r.price_paid), r.acquired_on || ''].join('|');
+const lotRow = l => ({ id: l.id, user_id: cloud.u.id, card_id: l.cardId, qty: Math.max(1, Math.min(9999, l.qty | 0 || 1)), lang: String(l.lang || 'fr').slice(0, 8), finish: ['normal', 'reverse', 'holo', 'firstEdition'].includes(l.finish) ? l.finish : 'normal', condition: CONDS.some(c => c[0] === l.cond) ? l.cond : 'NM', price_paid: l.price == null ? null : Math.round(l.price * 100) / 100, acquired_on: l.date || null });
+const rowLot = r => ({ id: r.id, cardId: r.card_id, qty: r.qty, lang: r.lang, finish: r.finish, cond: r.condition, price: r.price_paid == null ? null : Number(r.price_paid), date: r.acquired_on || null, added: Date.parse(r.created_at) || Date.now() });
+const totSig = t => [t.eur ?? '', t.usd ?? '', t.n ?? 0].join('|');
+let syncing = false, syncT = null, syncState = 'ok', syncMsg = '', lastSync = null, retryT = null;
+function setSync(st, msg) {
+  syncState = st; syncMsg = msg || '';
+  const el = $('#wp-sync'); if (!el) return;
+  el.hidden = !cloud; el.className = st === 'error' ? 'bad' : '';
+  el.innerHTML = st === 'pending' ? 'Synchronisation avec votre compte…'
+    : st === 'error' ? `Synchronisation impossible (${esc(msg || 'réseau')}). Vos modifications sont conservées sur cet appareil et seront renvoyées automatiquement. <button class="wp-link" data-act="syncnow">Réessayer</button>`
+    : 'Collection synchronisée avec votre compte' + (lastSync ? ' · ' + fDT(lastSync) : '') + '.';
+}
+function shadow() { if (!S.sh) S.sh = { lots: {}, wish: [], tot: {} }; return S.sh; }
+function diff() {
+  const sh = shadow(), up = [], del = [], now = new Set();
+  S.lots.forEach(l => { if (!UUID.test(l.id)) l.id = uid(); now.add(l.id); if (sh.lots[l.id] !== lotSig(l)) up.push(l); });
+  Object.keys(sh.lots).forEach(id => { if (!now.has(id)) del.push(id); });
+  const wAdd = S.wish.filter(w => !sh.wish.includes(w)), wDel = sh.wish.filter(w => !S.wish.includes(w));
+  const tUp = S.totals.filter(t => t.eur != null && sh.tot[t.d] !== totSig(t));
+  return { up, del, wAdd, wDel, tUp, any: !!(up.length || del.length || wAdd.length || wDel.length || tUp.length) };
+}
+function schedSync(ms = 900) { clearTimeout(syncT); syncT = setTimeout(pushNow, ms); }
+async function pushNow() {
+  if (!cloud) return true;
+  if (syncing) { schedSync(1500); return false; }
+  const d = diff();
+  if (!d.any) { if (syncState !== 'ok') setSync('ok'); return true; }
+  syncing = true; setSync('pending');
+  const c = cloud.c, uidv = cloud.u.id, sh = shadow();
+  try {
+    const chk = r => { if (r && r.error) throw r.error; };
+    for (let i = 0; i < d.up.length; i += 200) chk(await c.from('collection_items').upsert(d.up.slice(i, i + 200).map(lotRow), { onConflict: 'id' }));
+    for (let i = 0; i < d.del.length; i += 100) chk(await c.from('collection_items').delete().in('id', d.del.slice(i, i + 100)));
+    if (d.wAdd.length) chk(await c.from('wishlist').upsert(d.wAdd.map(w => ({ user_id: uidv, card_id: w })), { onConflict: 'user_id,card_id' }));
+    if (d.wDel.length) chk(await c.from('wishlist').delete().in('card_id', d.wDel));
+    if (d.tUp.length) chk(await c.from('value_snapshots').upsert(d.tUp.map(t => ({ user_id: uidv, d: t.d, eur: t.eur, usd: t.usd, cards: t.n || 0 })), { onConflict: 'user_id,d' }));
+    d.up.forEach(l => { sh.lots[l.id] = lotSig(l); }); d.del.forEach(id => { delete sh.lots[id]; });
+    sh.wish = S.wish.slice(); d.tUp.forEach(t => { sh.tot[t.d] = totSig(t); });
+    lastSync = Date.now(); writeNow(); setSync('ok');
+    clearTimeout(retryT);
+  } catch (e) {
+    setSync('error', e && e.message ? String(e.message).slice(0, 90) : '');
+    clearTimeout(retryT); retryT = setTimeout(() => pushNow(), 30000);
+    syncing = false; return false;
+  }
+  syncing = false;
+  if (diff().any) schedSync(300);
+  return true;
+}
+async function pullAll() { // la collection du compte devient l'état local (après envoi des modifications en attente)
+  if (!cloud) return false;
+  if (diff().any && !(await pushNow())) return false;
+  const c = cloud.c;
+  const all = async (t, cols, ord) => { const out = []; for (let f = 0; ; f += 1000) { let q = c.from(t).select(cols); if (ord) q = q.order(ord); const r = await q.range(f, f + 999); if (r.error) throw r.error; out.push(...r.data); if (r.data.length < 1000) break; } return out; };
+  try {
+    const [lots, wish, snaps] = await Promise.all([all('collection_items', '*', 'created_at'), all('wishlist', 'card_id', 'created_at'), all('value_snapshots', '*', 'd')]);
+    S.lots = lots.map(rowLot); S.wish = wish.map(w => w.card_id);
+    const sh = { lots: {}, wish: S.wish.slice(), tot: {} };
+    S.lots.forEach(l => { sh.lots[l.id] = lotSig(l); });
+    const tot = new Map(S.totals.map(t => [t.d, t]));
+    snaps.forEach(r => { const t = { d: r.d, eur: r.eur == null ? null : Number(r.eur), usd: r.usd == null ? null : Number(r.usd), n: r.cards }; tot.set(r.d, t); sh.tot[r.d] = totSig(t); });
+    S.totals = [...tot.values()].sort((a, b) => a.d < b.d ? -1 : 1);
+    S.sh = sh; ver++; aggCache = null; lastSync = Date.now(); writeNow(); setSync('ok');
+    // cartes sans détail (jamais consultées sur cet appareil) : le détail et les prix sont récupérés en arrière-plan
+    const miss = [...new Set(S.lots.map(l => l.cardId).concat(S.wish))].filter(id => !S.cards[id] || !S.cards[id].name || S.cards[id].name === id);
+    if (miss.length) pool(miss.slice(0, 300), 4, async id => { await hydrate(id); }).then(() => { if (/^(collection|valeur|souhaits)$/.test(route().parts[0] || '')) render(true); });
+    return true;
+  } catch (e) { setSync('error', e && e.message ? String(e.message).slice(0, 90) : ''); return false; }
+}
+/* collection enregistrée sur cet appareil avant la connexion : proposée à l'import, jamais effacée ni remplacée */
+let legacy = null;
+async function checkLegacy() {
+  legacy = null;
+  if (!cloud || S.legacyDone) return;
+  const L = await readKey('state');
+  if (L && ((L.lots && L.lots.length) || (L.wish && L.wish.length))) legacy = L;
+  paintLegacy();
+}
+function paintLegacy() {
+  const el = $('#wp-legacy'); if (!el) return;
+  if (!legacy) { el.hidden = true; return; }
+  const n = legacy.lots.reduce((s, l) => s + (l.qty || 1), 0);
+  el.hidden = false;
+  el.innerHTML = `<div><b>Une collection est enregistrée sur cet appareil.</b><br><span class="note">${NUM.format(n)} carte${n > 1 ? 's' : ''} (${NUM.format(legacy.lots.length)} ligne${legacy.lots.length > 1 ? 's' : ''}) ${(legacy.wish || []).length ? 'et ' + legacy.wish.length + ' souhait' + (legacy.wish.length > 1 ? 's' : '') + ' ' : ''}n'${n > 1 ? 'ont' : 'a'} pas encore été ajouté${n > 1 ? 'es' : 'e'} à votre compte. Elle sera <b>ajoutée</b> à celle de votre compte, sans rien remplacer ni effacer.</span></div><div class="wp-hbtn"><button class="cta" data-act="legacyimport">Ajouter à mon compte</button><button class="cta ghost" data-act="legacylater">Plus tard</button></div>`;
+}
+async function importLegacy() {
+  if (!legacy) return;
+  const L = legacy;
+  (L.lots || []).forEach(l => {
+    if (!l || !l.cardId) return;
+    const lot = { id: uid(), cardId: String(l.cardId), qty: Math.max(1, Math.min(9999, parseInt(l.qty) || 1)), lang: l.lang || 'fr', finish: l.finish || 'normal', cond: l.cond || 'NM', price: num(l.price), date: l.date || null, added: l.added || Date.now() };
+    const twin = S.lots.find(x => lotSig(x) === lotSig(lot));
+    if (twin) twin.qty = Math.min(9999, twin.qty + lot.qty); else S.lots.push(lot);
+  });
+  (L.wish || []).forEach(w => { if (!S.wish.includes(w) && !S.lots.some(l => l.cardId === w)) S.wish.push(w); });
+  Object.entries(L.cards || {}).forEach(([k, v]) => { if (!S.cards[k] || (v.pricedAt || 0) > (S.cards[k].pricedAt || 0)) S.cards[k] = v; });
+  Object.entries(L.snaps || {}).forEach(([k, a]) => { const cur = S.snaps[k] || []; const ds = new Set(cur.map(x => x.d)); a.forEach(x => { if (!ds.has(x.d)) cur.push(x); }); cur.sort((a1, b1) => a1.d < b1.d ? -1 : 1); S.snaps[k] = cur; });
+  (L.totals || []).forEach(x => { if (!S.totals.some(y => y.d === x.d)) S.totals.push(x); });
+  S.totals.sort((a, b) => a.d < b.d ? -1 : 1);
+  S.legacyDone = true; legacy = null; save(); paintLegacy();
+  const ok = await pushNow(); render(true);
+  const p = $('#wp-prog'); say(ok ? 'Collection de cet appareil ajoutée à votre compte.' : 'Import enregistré sur cet appareil ; l\'envoi vers votre compte réessaiera automatiquement.');
+}
+/* accès réservé : renvoie vers la connexion, puis revient sur la même page */
+function needLogin() {
+  if (!guest) return false;
+  const here = (location.pathname.replace(/^\//, '') || 'catalogue.html') + location.search + location.hash;
+  PW.setNext(here);
+  location.replace('connexion.html?next=' + encodeURIComponent(PW.safeNext(here)));
+  return true;
+}
+const PRIVATE = /^(collection|valeur|souhaits)$/;
+addEventListener('online', () => { if (cloud) pushNow(); });
+document.addEventListener('visibilitychange', () => { if (cloud && document.visibilityState === 'visible' && !syncing && !diff().any && Date.now() - (lastSync || 0) > 60000) pullAll().then(ok => { if (ok && /^(collection|valeur|souhaits)$/.test(route().parts[0] || '')) render(true); }); });
 
 /* ------------------------------------------------------------------ routage */
 function route() {
@@ -606,6 +740,7 @@ function readLotForm(f) {
 document.addEventListener('submit', ev => {
   const f = ev.target.closest('form[data-form]'); if (!f || !app.contains(f)) return;
   ev.preventDefault();
+  if (f.dataset.form === 'lot' && needLogin()) return;
   if (f.dataset.form === 'search') {
     const d = new FormData(f), lg = d.get('lang');
     if (lg && lg !== S.lang) { S.lang = lg; seriesCache = null; save(); }
@@ -621,10 +756,14 @@ document.addEventListener('submit', ev => {
   }
 });
 document.addEventListener('click', async ev => {
-  const b = ev.target.closest('[data-act]'); if (!b || !app.contains(b)) return;
+  const b = ev.target.closest('[data-act]'); if (!b || !(app.contains(b) || b.closest('#wp-legacy,#wp-sync'))) return;
   const a = b.dataset.act;
+  if (['quickadd', 'openadd', 'editlot', 'dellot', 'wish', 'import'].includes(a) && needLogin()) { ev.preventDefault(); return; }
   if (a === 'nav') location.hash = b.dataset.href;
   else if (a === 'retry') render();
+  else if (a === 'syncnow') { pushNow(); }
+  else if (a === 'legacyimport') importLegacy();
+  else if (a === 'legacylater') { legacy = null; paintLegacy(); }
   else if (a === 'back') { ev.preventDefault(); history.length > 1 ? history.back() : go('catalogue'); }
   else if (a === 'quickadd') {
     ev.preventDefault();
@@ -671,6 +810,7 @@ document.addEventListener('input', ev => {
 let token = 0;
 async function render(keepScroll) {
   const my = ++token, r = route(), v = r.parts[0] || 'catalogue';
+  if (PRIVATE.test(v) && needLogin()) return;
   badge();
   $$('.wp-tabs a').forEach(a => a.setAttribute('aria-current', (a.dataset.v === (v === 'extension' || v === 'carte' ? 'catalogue' : v)) ? 'page' : 'false'));
   const y = scrollY;
@@ -688,7 +828,19 @@ function badge() { $$('.wp-tabs a').forEach(a => { const n = $('.wp-n', a); if (
 async function init() {
   app = $('#wp-app'); status = $('#wp-status');
   if (!app) return;
+  const accounts = window.PW && (PW.configured || window.PW_TEST_CLIENT);
+  if (accounts) {
+    try { const u = await PW.user(); if (u) cloud = { c: await PW.client(), u }; else guest = true; } catch (e) { guest = true; }
+  }
+  const first = cloud ? !(await (async () => { try { await IDB.open(); return await IDB.get('state:' + cloud.u.id); } catch (e) { return null; } })()) : false;
   await load(); banner();
+  if (cloud) {
+    if (first) { const L = await readKey('state'); if (L) { S.cards = Object.assign({}, L.cards || {}); S.snaps = Object.assign({}, L.snaps || {}); S.lang = L.lang || S.lang; } } // simple cache de cartes/prix ; la collection locale n'est pas reprise sans accord
+    const f = $('.wp-foot'); if (f) f.innerHTML = 'Votre collection est enregistrée sur votre compte PokeWorth (et copiée sur cet appareil pour fonctionner hors ligne). Cartes et prix : TCGdex, avec les prix Cardmarket (en euros) et TCGplayer (en dollars), jamais convertis ni additionnés. Voir la <a href="methode-des-prix.html">méthode des prix</a> et la <a href="confidentialite.html">politique de confidentialité</a>.';
+    setSync('pending'); await pullAll(); await checkLegacy();
+  } else if (guest) {
+    const f = $('.wp-foot'); if (f) f.insertAdjacentHTML('afterbegin', '<b>Le catalogue est public.</b> Pour constituer votre collection, <a href="connexion.html?next=catalogue.html%23%2Fcollection">connectez-vous avec Google ou Apple</a>. ');
+  }
   addEventListener('hashchange', () => render());
   render();
 }
