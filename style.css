@@ -1167,3 +1167,26 @@ a.store-badge:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
 .sub{max-width:none}
 .wa-closed .hero-cta{flex-direction:row}
 .sec-head h1{font-size:clamp(28px,4.2vw,42px);letter-spacing:-1px;line-height:1.1;margin:0 auto 12px;max-width:none;text-wrap:balance}
+
+/* v13.7 · actualités : 3 bandeaux + « Tout voir », visuels fondus dans le fond (aucun carré de couleur) */
+.nc-row .nc-img,.nc-big .nc-img{background:none;box-shadow:none;border:0;border-radius:0}
+.nc-row .nc-img img{filter:drop-shadow(0 6px 10px rgba(4,1,16,.45))}
+.news-more{display:block;margin:22px auto 0;padding:12px 28px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-weight:700;cursor:pointer;transition:background-color .2s,transform .2s}
+.news-more:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
+.news-more:focus-visible{outline:2px solid #c9b0ff;outline-offset:3px}
+.news-more[hidden]{display:none}
+
+/* v13.8 · réseaux sociaux : icônes seules, sans bulle */
+a.sb,a.sb:hover,a.sb:active{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;width:40px;height:40px;border-radius:12px}
+a.sb::before,a.sb::after{display:none!important}
+a.sb img{width:34px;height:34px;transition:transform .2s}
+a.sb:hover img{transform:translateY(-2px) scale(1.08)}
+.social{gap:12px}
+
+/* v13.10 · smartphone : le héros occupe exactement un écran (sous la barre de 64 px) */
+@media (max-width:767px){
+  .hero3{min-height:calc(100vh - 64px);min-height:calc(100svh - 64px);max-height:none;padding-top:12px;padding-bottom:12px;align-items:center}
+  .hero3-grid{gap:14px}
+  .hero3-text h1{margin-bottom:12px}
+  .hero3-vis .pokemon-fan{--pokemon-fan-card-w:clamp(120px,min(37vw,21svh),190px)}
+}

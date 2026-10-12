@@ -216,8 +216,16 @@
         var list = items.filter(function (n) { return active === "all" || n.type === active; });
         featBox.textContent = ""; grid.textContent = "";
         empty.hidden = list.length > 0;
-        list.forEach(function (n) { grid.appendChild(card(n)); });
+        (expanded ? list : list.slice(0, 3)).forEach(function (n) { grid.appendChild(card(n)); });
+        more.hidden = list.length <= 3;
+        more.textContent = expanded ? "Voir moins" : "Tout voir (" + list.length + ")";
+        more.setAttribute("aria-expanded", expanded ? "true" : "false");
       };
+      var expanded = false;
+      var more = el("button", "news-more", "Tout voir");
+      more.type = "button";
+      more.addEventListener("click", function () { expanded = !expanded; render(); if (!expanded) { grid.scrollIntoView({ block: "nearest" }); } });
+      grid.parentNode.insertBefore(more, grid.nextSibling);
       var counts = { all: items.length };
       items.forEach(function (n) { counts[n.type] = (counts[n.type] || 0) + 1; });
       var cats = [["all", "Tout"]].concat(D.categories.filter(function (c) { return counts[c.id]; }).map(function (c) { return [c.id, c.label]; }));
@@ -225,7 +233,7 @@
         var b = el("button", "", c[1] + " (" + counts[c[0]] + ")");
         b.type = "button"; b.setAttribute("aria-pressed", c[0] === active ? "true" : "false"); b.setAttribute("data-filter", c[0]);
         b.addEventListener("click", function () {
-          active = c[0];
+          active = c[0]; expanded = false;
           $$("button", filtersBox).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
           render();
           status.textContent = counts[active] + (counts[active] > 1 ? " articles affichés" : " article affiché") + " : " + c[1];
