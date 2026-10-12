@@ -1,4 +1,7 @@
-/* PokeWorth · site.js — navigation, page unique, actualités, FAQ, couleurs de marque.
+/* anciennes adresses d'ancres (index.html#a-propos…) : ces rubriques ont maintenant leur propre page */
+(function () { var m = { "a-propos": "a-propos.html", "roadmap": "roadmap.html", "ressources": "ressources.html" }, h = location.hash.slice(1);
+  if (m[h] && !document.getElementById(h)) location.replace(m[h]); })();
+/* Pokéworth · site.js — navigation, page unique, actualités, FAQ, couleurs de marque.
    Sans dépendance. Chaque bloc ne s'active que si ses éléments existent sur la page. */
 (function () {
   "use strict";
@@ -195,24 +198,25 @@
         if (u) { var a = el("a", "", n.titre); a.href = u; h.appendChild(a); } else h.textContent = nb(n.titre);
         return h;
       };
-      var card = function (n, big) {
-        var c = el("article", "card nc" + (big ? " nc-big" : ""));
-        c.appendChild(visual(n, big));
+      /* bandeau horizontal compact : visuel à gauche, texte au centre, date et lecture à droite */
+      var card = function (n) {
+        var c = el("article", "card nc nc-row");
+        c.appendChild(visual(n, false));
         var b = el("div", "nc-body");
-        b.appendChild(meta(n)); b.appendChild(title(n, big ? "h3" : "h4"));
+        b.appendChild(meta(n)); b.appendChild(title(n, "h3"));
         if (n.texte) b.appendChild(el("p", "nc-ex", n.texte));
-        if (href(n)) { var l = el("a", "nc-more", "Voir les " + n.produits.length + " produits de la série"); l.href = href(n); b.appendChild(l); }
-        b.appendChild(foot(n));
         c.appendChild(b);
+        var side = el("div", "nc-side");
+        side.appendChild(foot(n));
+        if (href(n)) { var l = el("a", "nc-more", "Voir les " + n.produits.length + " produits"); l.href = href(n); side.appendChild(l); }
+        c.appendChild(side);
         return c;
       };
       var render = function () {
         var list = items.filter(function (n) { return active === "all" || n.type === active; });
         featBox.textContent = ""; grid.textContent = "";
         empty.hidden = list.length > 0;
-        if (!list.length) return;
-        featBox.appendChild(card(list[0], true));
-        list.slice(1).forEach(function (n) { grid.appendChild(card(n, false)); });
+        list.forEach(function (n) { grid.appendChild(card(n)); });
       };
       var counts = { all: items.length };
       items.forEach(function (n) { counts[n.type] = (counts[n.type] || 0) + 1; });

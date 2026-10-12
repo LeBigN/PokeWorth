@@ -438,6 +438,8 @@
       if (d.tilt) op.tilt = +d.tilt;
       if (d.direction) op.direction = +d.direction;
       if (d.label) op.label = d.label;
+      if (d.controls) op.controls = d.controls !== "false";
+      if (d.dots) op.dots = d.dots !== "false";
       try { out.push(new PokemonCardFan(e, op)); } catch (err) { if (root.console) console.error(err); }
     });
     return out;

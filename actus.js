@@ -151,7 +151,7 @@
       root.appendChild(el("p", "note", "Cette série est introuvable."));
       return;
     }
-    document.title = n.titre.replace(/^Sortie : /, "") + " · PokeWorth";
+    document.title = n.titre.replace(/^Sortie : /, "") + " · Pokéworth";
     var head = el("header", "serie-head");
     head.appendChild(visual(n, "serie-logo"));
     var t = el("div", "serie-title");

@@ -251,3 +251,19 @@
   .pokemon-fan-dot::before { transition: none !important; }
   .pokemon-fan-card { will-change: auto; }
 }
+
+/* v13.5 · vraies cartes détourées (WebP transparent, coins arrondis d'origine) :
+   aucun cadre, aucun rognage, aucune pastille de fond ; l'ombre suit le contour exact de la carte */
+.pokemon-fan-card[data-fit="card"] .pokemon-fan-inner {
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.pokemon-fan-card[data-fit="card"] .pokemon-fan-inner::after { display: none; }
+.pokemon-fan-card[data-fit="card"]::before { display: none; }
+.pokemon-fan-card[data-fit="card"] .pokemon-fan-img {
+  object-fit: contain;
+  padding: 0;
+  filter: drop-shadow(0 12px 16px rgba(var(--pokemon-fan-shadow), .55));
+}

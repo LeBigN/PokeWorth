@@ -1107,3 +1107,63 @@ html{scroll-padding-top:84px}
   .nav .nav-menu{justify-self:stretch;width:auto}
   .nav .nav-menu>a[aria-current]{background:rgba(255,255,255,.12)!important}
 }
+
+/* ===== v13.3 ===== */
+/* 2 · barre de navigation : aucun indicateur de rubrique (ni surlignage, ni soulignement, ni barre) */
+.nav .nl:hover,.nav .nl-dd:hover,.nav .nav-menu>a:hover,
+.nav .nl[aria-current],.nav .nl-dd[aria-current],.nav .nav-menu>a[aria-current],.nav nav a[aria-current]{text-decoration:none!important;background:none!important;box-shadow:none!important;border:0!important}
+.nav .nl:hover,.nav .nl-dd:hover,.nav .nav-menu>a:hover{color:#fff}
+.nav .nl,.nav .nav-menu>a,.nav .nl-dd{transition:none}
+.nav .nav-sub a[aria-current],.nav .nav-sub a:hover{background:none!important}
+.nav .nav-sub a:hover{color:#fff;text-decoration:none}
+@media (max-width:959px){.nav .nav-menu>a[aria-current]{background:none!important}}
+
+/* 1 · pastilles officielles App Store / Google Play */
+.store-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.store-badge{display:inline-block;line-height:0;border-radius:10px}
+.store-badge img{display:block;width:165px;height:52px;aspect-ratio:564/178}
+a.store-badge:hover{filter:brightness(1.06)}
+a.store-badge:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.store-badge.off{cursor:default}
+.store-soon{margin:10px 0 0;font-size:14px;font-weight:700;color:var(--acc)}
+.hero3-text .hero-cta{margin-top:24px}
+@media (max-width:1023px){.store-row{justify-content:center}}
+@media (max-width:420px){.store-row{gap:10px}.store-badge img{width:148px;height:auto}}
+
+/* 5 · actualités : bandeaux horizontaux compacts */
+.news-list2{display:grid;gap:10px}
+.nc-row{display:grid;grid-template-columns:128px minmax(0,1fr) auto;align-items:center;gap:6px 18px;padding:10px 20px 10px 10px;flex-direction:row}
+.nc-row .nc-img{height:84px;padding:8px;border-radius:14px}
+.nc-row .nc-body{padding:0;gap:6px;flex:none;min-width:0}
+.nc-row .nc-title{font-size:18px}
+.nc-row .nc-ex{font-size:14.5px;line-height:1.45;-webkit-line-clamp:2;margin:0}
+.nc-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right;white-space:nowrap}
+.nc-side .nc-foot{margin:0;padding:0;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px}
+.nc-side .nc-more{font-size:14px}
+@media (max-width:760px){
+  .nc-row{grid-template-columns:84px minmax(0,1fr);padding:10px;gap:4px 12px;align-items:start}
+  .nc-row .nc-img{height:72px;padding:6px;grid-row:1}
+  .nc-row .nc-title{font-size:16.5px}
+  .nc-row .nc-ex{-webkit-line-clamp:2}
+  .nc-side{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;text-align:left;white-space:normal;padding-top:2px}
+  .nc-side .nc-foot{flex-direction:row;gap:4px 12px}
+}
+
+/* 4 · 8 · textes d'introduction et notes : toute la largeur du contenu */
+.sec-head{max-width:none}
+.sec-head .sub,.note.center,.strong-note,.hero3-vis .note.center{max-width:none;width:100%;text-wrap:pretty}
+.sec-head .sub{font-size:clamp(16.5px,1.5vw,18px)}
+.note.center{font-size:15px;line-height:1.6}
+
+/* Web App fermée : page « bientôt disponible » */
+.wa-closed{text-align:center;max-width:none;padding:clamp(28px,5vw,56px)}
+.wa-closed h1{margin:16px auto 12px;max-width:20ch}
+.wa-closed .sub{margin-inline:auto;max-width:none}
+.wa-closed .hero-cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.nav nav a[aria-current],.nav .nl[aria-current],.nav .nl-dd[aria-current],.nav nav a,.nav .nl{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;--f:0}
+.nav .nl[aria-current],.nav .nl-dd[aria-current],.nav nav a[aria-current],.nav .nav-menu>a[aria-current]{color:rgba(255,255,255,.9)!important}
+.nav .nl:hover,.nav .nl-dd:hover,.nav .nav-menu>a:hover{color:rgba(255,255,255,.9)!important}
+.faq-a p,.sx-lead,.sx-cd,.sx-foot p,.wp-foot,.teaser-text{max-width:none}
+.sub{max-width:none}
+.wa-closed .hero-cta{flex-direction:row}
+.sec-head h1{font-size:clamp(28px,4.2vw,42px);letter-spacing:-1px;line-height:1.1;margin:0 auto 12px;max-width:none;text-wrap:balance}
