@@ -1,0 +1,253 @@
+/* =====================================================================
+   PokemonCardFan · éventail de 5 cartes qui tournent automatiquement
+   HTML/CSS/JS vanilla, autonome : toutes les classes sont préfixées « pokemon-fan- ».
+   Réglages : variables CSS ci-dessous (taille) et options JS (vitesse, inclinaisons).
+   ===================================================================== */
+
+.pokemon-fan {
+  /* taille d'une carte : 220 px sur ordinateur, réduite par paliers (voir @media) */
+  --pokemon-fan-card-w: 220px;
+  --pokemon-fan-ratio: 63 / 88;             /* proportions d'une carte Pokémon TCG */
+  --pokemon-fan-radius: 4.4%;               /* arrondi des angles, relatif à la largeur */
+  --pokemon-fan-perspective: 1300px;
+  --pokemon-fan-shadow: 4, 1, 18;           /* couleur d'ombre (r, g, b) */
+  --pokemon-fan-frame: rgba(255, 255, 255, .16);
+  --pokemon-fan-accent: #c9b0ff;
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pokemon-fan *,
+.pokemon-fan *::before,
+.pokemon-fan *::after { box-sizing: border-box; }
+
+/* scène : hauteur = carte + marge pour l'inclinaison, jamais plus large que son conteneur */
+.pokemon-fan-stage {
+  position: relative;
+  width: 100%;
+  height: calc(var(--pokemon-fan-card-w) / (63 / 88) * 1.34);
+  perspective: var(--pokemon-fan-perspective);
+  perspective-origin: 50% 40%;
+  overflow: visible;
+  touch-action: pan-y;                      /* le défilement vertical de la page reste libre */
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  cursor: grab;
+}
+.pokemon-fan-stage.is-dragging { cursor: grabbing; }
+.pokemon-fan-stage:focus-visible {
+  outline: 2px solid var(--pokemon-fan-accent);
+  outline-offset: 6px;
+  border-radius: 24px;
+}
+
+.pokemon-fan-track {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* chaque carte est centrée dans la scène ; sa position vient de transform (calculé en JS) */
+.pokemon-fan-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--pokemon-fan-card-w);
+  aspect-ratio: var(--pokemon-fan-ratio);
+  margin: calc(var(--pokemon-fan-card-w) / (63 / 88) / -2) 0 0 calc(var(--pokemon-fan-card-w) / -2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transform-origin: 50% 85%;                /* l'éventail pivote depuis le bas des cartes */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.pokemon-fan-card:focus { outline: none; }
+.pokemon-fan-card:focus-visible .pokemon-fan-inner {
+  outline: 2px solid var(--pokemon-fan-accent);
+  outline-offset: 3px;
+}
+
+/* enveloppe intérieure : porte le survol (soulèvement, zoom, ombre) sans toucher à la position */
+.pokemon-fan-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--pokemon-fan-radius) / calc(var(--pokemon-fan-radius) * .72);
+  transform-style: preserve-3d;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1);
+  overflow: hidden;
+  background: linear-gradient(160deg, #6b4bd0, #2a1466);   /* opaque : les cartes voisines ne transparaissent jamais */
+  box-shadow:
+    0 0 0 1px var(--pokemon-fan-frame),
+    0 10px 22px -8px rgba(var(--pokemon-fan-shadow), .55);
+}
+
+/* ombre renforcée de la carte centrale : calque séparé dont seule l'opacité change (animation peu coûteuse) */
+.pokemon-fan-card::before {
+  content: "";
+  position: absolute;
+  inset: 6% 4% -4%;
+  z-index: -1;
+  border-radius: 8%;
+  background: rgba(var(--pokemon-fan-shadow), .75);
+  filter: blur(26px);
+  opacity: 0;
+  transition: opacity .9s cubic-bezier(.22, .9, .24, 1);
+  pointer-events: none;
+}
+.pokemon-fan-card.is-center::before { opacity: .85; }
+
+.pokemon-fan-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;                        /* image de carte : remplit le cadre sans déformation */
+  object-position: center;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.pokemon-fan-card[data-fit="contain"] .pokemon-fan-img {
+  object-fit: contain;                      /* visuels non rectangulaires (produits) : jamais déformés */
+  padding: 9% 8%;
+  filter: drop-shadow(0 8px 14px rgba(var(--pokemon-fan-shadow), .45));
+}
+
+/* reflet discret, plus marqué sur la carte centrale */
+.pokemon-fan-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, .22) 46%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0) 38%);
+  mix-blend-mode: soft-light;
+  opacity: .35;
+  transition: opacity .9s ease;
+  pointer-events: none;
+}
+.pokemon-fan-card.is-center .pokemon-fan-inner::after { opacity: .9; }
+
+/* survol (souris uniquement) : léger soulèvement, zoom subtil et ombre accrue */
+@media (hover: hover) and (pointer: fine) {
+  .pokemon-fan-card:hover .pokemon-fan-inner,
+  .pokemon-fan-card:focus-visible .pokemon-fan-inner {
+    transform: translate3d(0, -12px, 0) scale(1.04);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, .28),
+      0 26px 40px -10px rgba(var(--pokemon-fan-shadow), .75);
+  }
+}
+
+/* carte dont l'image n'a pas pu se charger : repli lisible, sans image externe */
+.pokemon-fan-card.is-error .pokemon-fan-img { display: none; }
+.pokemon-fan-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 14%;
+  text-align: center;
+  font-size: clamp(12px, calc(var(--pokemon-fan-card-w) * .08), 17px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, .9);
+  background: linear-gradient(160deg, #5a3cc2, #231057);
+}
+.pokemon-fan-card.is-error .pokemon-fan-fallback { display: flex; }
+
+/* boutons précédent / suivant et pastilles */
+.pokemon-fan-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+.pokemon-fan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  color: #fff;
+  cursor: pointer;
+  background: radial-gradient(120% 90% at 22% -18%, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 55%), rgba(120, 88, 230, .22);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 8px 18px -8px rgba(8, 3, 28, .7);
+  transition: transform .2s, background-color .2s;
+}
+.pokemon-fan-btn:hover { transform: translateY(-1px); background-color: rgba(150, 118, 255, .34); }
+.pokemon-fan-btn:focus-visible { outline: 2px solid var(--pokemon-fan-accent); outline-offset: 3px; }
+.pokemon-fan-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+.pokemon-fan-dots { display: flex; gap: 4px; }
+.pokemon-fan-dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.pokemon-fan-dot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .38);
+  transition: width .35s, margin .35s, background-color .35s;
+}
+.pokemon-fan-dot[aria-current="true"]::before { width: 22px; margin-left: -11px; background: var(--pokemon-fan-accent); }
+.pokemon-fan-dot:focus-visible { outline: 2px solid var(--pokemon-fan-accent); outline-offset: 0; border-radius: 8px; }
+
+.pokemon-fan-sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* tablette : cartes d'environ 170 px */
+@media (max-width: 1023px) { .pokemon-fan { --pokemon-fan-card-w: 170px; } }
+/* mobile : 125 à 145 px selon l'écran, éventail plus compact (les écarts sont proportionnels à la carte) */
+@media (max-width: 767px) { .pokemon-fan { --pokemon-fan-card-w: clamp(125px, 36vw, 145px); } }
+
+/* préférence « réduire les animations » : aucune transition ; la rotation automatique est coupée côté JS */
+@media (prefers-reduced-motion: reduce) {
+  .pokemon-fan-inner,
+  .pokemon-fan-card::before,
+  .pokemon-fan-inner::after,
+  .pokemon-fan-btn,
+  .pokemon-fan-dot::before { transition: none !important; }
+  .pokemon-fan-card { will-change: auto; }
+}

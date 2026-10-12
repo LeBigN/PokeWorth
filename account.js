@@ -32,24 +32,96 @@ async function connexion() {
   if (next) PW.setNext(next);
   const code = qs.get('error_code') || hs.get('error_code') || qs.get('error') || hs.get('error');
   const desc = qs.get('error_description') || hs.get('error_description');
+  const forms = {}; root.querySelectorAll('form[data-form]').forEach(f => forms[f.dataset.form] = f);
+  const TITLES = { login: ['Bienvenue sur PokeWorth', 'Retrouvez votre collection Pokémon et suivez la valeur de vos cartes depuis un seul espace.'],
+    signup: ['Créer votre compte', 'Gratuit, sans carte bancaire. Vous pourrez le supprimer à tout moment.'],
+    forgot: ['Mot de passe oublié', 'Nous vous envoyons un lien sécurisé par e-mail.'],
+    reset: ['Nouveau mot de passe', 'Choisissez un mot de passe d\'au moins ' + PW.MIN_PW + ' caractères.'] };
+  let mode = 'login';
+  const show = m => {
+    mode = m; say('');
+    Object.entries(forms).forEach(([k, f]) => f.hidden = k !== m);
+    root.querySelectorAll('#pw-seg button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    $('#pw-seg').hidden = m === 'forgot' || m === 'reset';
+    $('#pw-title').textContent = TITLES[m][0]; $('#pw-sub').textContent = TITLES[m][1];
+    $('#pw-oauth').hidden = !(m === 'login' || m === 'signup') || !(PW.providers.google || PW.providers.apple);
+  };
+  root.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { show(b.dataset.mode); const f = forms[mode]; const i = f && f.querySelector('input'); if (i) i.focus(); }));
+  root.querySelectorAll('[data-eye]').forEach(b => b.addEventListener('click', () => {
+    const i = document.getElementById(b.dataset.eye), on = i.type === 'password';
+    i.type = on ? 'text' : 'password'; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.setAttribute('aria-label', on ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+  }));
   const btns = [...root.querySelectorAll('[data-prov]')];
-  if (!PW.configured && !(window.PW_TEST_CLIENT)) {
-    btns.forEach(b => b.disabled = true);
-    $('#pw-off').hidden = false; return;
+  btns.forEach(b => b.hidden = !PW.providers[b.dataset.prov]);
+  if (!PW.providers.email && !PW.configured && !(window.PW_TEST_CLIENT)) {
+    Object.values(forms).forEach(f => { f.hidden = true; }); $('#pw-seg').hidden = true; $('#pw-off').hidden = false; return;
   }
   if (code) { say(PW.errText(code, desc), true); history.replaceState(null, '', location.pathname + (next ? '?next=' + encodeURIComponent(next) : '')); }
   const hadCode = qs.has('code');
+  const recovery = qs.get('mode') === 'reset' || hs.get('type') === 'recovery';
   let u = null;
   try { const c = await PW.client(); await c.auth.getSession(); u = await PW.user(); } catch (e) { if (!code) say('Impossible de joindre le service de connexion. Vérifiez votre connexion et réessayez.', true); }
-  if (u && (hadCode || next || PW.hint())) {
-    if (hadCode || next) { location.replace(PW.takeNext() || 'tableau-de-bord.html'); return; }
+  if (recovery && u) { show('reset'); }
+  else {
+    if (u && (hadCode || next || PW.hint())) {
+      if (hadCode || next) { location.replace(PW.takeNext() || 'tableau-de-bord.html'); return; }
+    }
+    if (u) {
+      $('#pw-in').hidden = true; const k = $('#pw-already'); k.hidden = false;
+      $('#pw-who').textContent = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || 'votre compte';
+      $('#pw-out').onclick = async () => { await PW.signOut(); location.reload(); };
+      return;
+    }
+    show(qs.get('mode') === 'signup' ? 'signup' : 'login');
+    if (recovery && !u) say('Ce lien de réinitialisation n\'est plus valide. Demandez-en un nouveau.', true);
   }
-  if (u) {
-    $('#pw-in').hidden = true; const k = $('#pw-already'); k.hidden = false;
-    $('#pw-who').textContent = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || 'votre compte';
-    $('#pw-out').onclick = async () => { await PW.signOut(); location.reload(); };
-    return;
-  }
+  if (code) say(PW.errText(code, desc), true);
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const mark = (el, bad) => { if (el) el.setAttribute('aria-invalid', bad ? 'true' : 'false'); };
+  const fail = (el, msg) => { mark(el, true); say(msg, true); if (el) el.focus(); return false; };
+  const checkPw = (p1, p2) => {
+    if (p1.value.length < PW.MIN_PW) return fail(p1, 'Le mot de passe doit contenir au moins ' + PW.MIN_PW + ' caractères.');
+    if (p2 && p1.value !== p2.value) return fail(p2, 'Les deux mots de passe ne correspondent pas.');
+    return true;
+  };
+  const run = async (form, job) => {
+    const b = form.querySelector('.pw-submit'), l = b.querySelector('.pw-lbl'), t = l.textContent;
+    say(''); form.querySelectorAll('input').forEach(i => mark(i, false));
+    busy(b, true); l.textContent = 'Un instant…';
+    try { await job(); } catch (e) { say(PW.errText(e && (e.code || e.error_code), e && e.message), true); }
+    finally { busy(b, false); l.textContent = t; }
+  };
+  forms.login.addEventListener('submit', ev => { ev.preventDefault();
+    const em = forms.login.elements.email, pw = $('#pw-l-pass');
+    if (!EMAIL_RE.test(em.value.trim())) return fail(em, 'Saisissez une adresse e-mail valide.');
+    if (!pw.value) return fail(pw, 'Saisissez votre mot de passe.');
+    run(forms.login, async () => { await PW.signInEmail(em.value.trim(), pw.value); location.replace(PW.takeNext() || 'tableau-de-bord.html'); });
+  });
+  forms.signup.addEventListener('submit', ev => { ev.preventDefault();
+    const em = forms.signup.elements.email, p1 = $('#pw-s-pass'), p2 = $('#pw-s-pass2'), tm = $('#pw-s-terms'), pr = $('#pw-s-promo');
+    if (!EMAIL_RE.test(em.value.trim())) return fail(em, 'Saisissez une adresse e-mail valide.');
+    if (!checkPw(p1, p2)) return;
+    if (!tm.checked) return fail(tm, 'Pour créer un compte, vous devez accepter les conditions d\'utilisation et la politique de confidentialité.');
+    run(forms.signup, async () => {
+      const d = await PW.signUpEmail(em.value.trim(), p1.value, pr.checked);
+      p1.value = p2.value = '';
+      if (d && d.session) { location.replace(PW.takeNext() || 'tableau-de-bord.html'); return; }
+      /* message identique que l'adresse existe déjà ou non : on ne révèle pas quels comptes existent */
+      say('Si cette adresse peut être utilisée, un e-mail de confirmation vient de vous être envoyé. Ouvrez-le pour activer votre compte (pensez à vérifier vos courriers indésirables).');
+      forms.signup.reset();
+    });
+  });
+  forms.forgot.addEventListener('submit', ev => { ev.preventDefault();
+    const em = forms.forgot.elements.email;
+    if (!EMAIL_RE.test(em.value.trim())) return fail(em, 'Saisissez une adresse e-mail valide.');
+    run(forms.forgot, async () => { await PW.resetRequest(em.value.trim()); say('Si un compte existe pour cette adresse, un e-mail contenant un lien de réinitialisation vient d\'être envoyé.'); });
+  });
+  forms.reset.addEventListener('submit', ev => { ev.preventDefault();
+    const p1 = $('#pw-r-pass'), p2 = $('#pw-r-pass2');
+    if (!checkPw(p1, p2)) return;
+    run(forms.reset, async () => { await PW.updatePassword(p1.value); p1.value = p2.value = ''; say('Votre mot de passe a été modifié. Redirection…'); setTimeout(() => location.replace('tableau-de-bord.html'), 900); });
+  });
   btns.forEach(b => b.addEventListener('click', async () => {
     say(''); busy(b, true);
     try { await PW.signIn(b.dataset.prov, next); }

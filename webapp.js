@@ -408,6 +408,18 @@ function varChip(v, label) {
 }
 
 /* ------------------------------------------------------------------ vue : catalogue */
+/* La Web App suit le jeu de cartes physique : la série « TCG Pocket » (application mobile) n'en fait pas partie. */
+const isPocketSeries = x => x && (x.id === 'tcgp' || /pocket/i.test(x.name || ''));
+const isPocketCard = id => /^(A\d|B\d|P-[AB])/i.test(String(id || ''));
+/* Regroupe une extension et ses sous-ensembles (ex. Zénith Suprême swsh12.5 et sa Galerie Galaroise swsh12.5gg) :
+   un sous-ensemble porte l'identifiant de l'extension suivi de lettres. Les identifiants restent ceux de l'API. */
+function groupSets(sets) {
+  const ids = new Set(sets.map(x => x.id));
+  const parentOf = x => { let best = null; ids.forEach(p => { if (p !== x.id && x.id.startsWith(p) && /^[a-z]+$/i.test(x.id.slice(p.length)) && (!best || p.length > best.length)) best = p; }); return best; };
+  const kids = new Map(), top = [];
+  sets.forEach(x => { const p = parentOf(x); if (p) { if (!kids.has(p)) kids.set(p, []); kids.get(p).push(x); } else top.push(x); });
+  return top.map(x => ({ set: x, subs: kids.get(x.id) || [] }));
+}
 let seriesCache = null;
 async function loadSeries() {
   const key = S.lang;
@@ -419,7 +431,7 @@ async function loadSeries() {
     try { d = await api('/series/' + encodeURIComponent(s.id), { ttl: 864e5 }); } catch (e) { d = { id: s.id, name: s.name, sets: [] }; }
     out[i] = { id: s.id, name: d.name || s.name, logo: s.logo || d.logo, sets: d.sets || [] };
   });
-  const d = out.filter(Boolean).filter(s => s.sets.length).reverse(); // les plus récentes d'abord
+  const d = out.filter(Boolean).filter(s => !isPocketSeries(s) && s.sets.length).reverse(); // les plus récentes d'abord
   seriesCache = { lang: key, d };
   return d;
 }
@@ -429,7 +441,7 @@ async function vCatalogue(r) {
   const head = `<form class="wp-search card" data-form="search" role="search">
     <label class="wp-f wp-grow"><span>Rechercher une carte</span><input type="search" name="q" value="${esc(q)}" placeholder="Nom (Dracaufeu), numéro (136) ou référence (swsh3-136)" autocomplete="off" enterkeyhint="search"></label>
     <label class="wp-f"><span>Rareté</span><select name="r"><option value="">Toutes</option>${(Array.isArray(rarities) ? rarities : []).map(x => `<option${x === rar ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select></label>
-    <label class="wp-f"><span>Langue du catalogue</span><select name="lang">${['fr', 'ja'].map(l => `<option value="${l}"${S.lang === l ? ' selected' : ''}>${l === 'fr' ? 'Français' : 'Japonais'}</option>`).join('')}</select></label>
+    <label class="wp-f"><span>Langue des cartes</span><select name="lang">${['fr', 'ja'].map(l => `<option value="${l}"${S.lang === l ? ' selected' : ''}>${l === 'fr' ? 'Français' : 'Japonais'}</option>`).join('')}</select></label>
     <button class="cta" type="submit">Rechercher</button></form>`;
   if (q || rar) {
     app.innerHTML = head + `<h2 class="wp-h">Résultats</h2><div id="wp-res">${loading(12)}</div>`;
@@ -440,14 +452,14 @@ async function vCatalogue(r) {
       if (q) p.push((/^\d+$/.test(q) ? 'localId=eq:' : 'name=') + encodeURIComponent(q));
       if (rar) p.push('rarity=eq:' + encodeURIComponent(rar));
       p.push('sort:field=name', 'pagination:page=' + pg, 'pagination:itemsPerPage=' + per);
-      const list = await api('/cards?' + p.join('&'));
+      const raw = await api('/cards?' + p.join('&')), list = Array.isArray(raw) ? raw.filter(c => !isPocketCard(c.id)) : raw, rawLen = Array.isArray(raw) ? raw.length : 0;
       const res = $('#wp-res'); if (!res) return;
-      if (!Array.isArray(list) || !list.length) { res.innerHTML = empty('Aucune carte trouvée', 'Essayez un autre nom, retirez le filtre de rareté ou changez la langue du catalogue.'); return; }
+      if (!Array.isArray(list) || !list.length) { res.innerHTML = empty('Aucune carte trouvée', 'Essayez un autre nom, retirez le filtre de rareté ou changez la langue des cartes.'); return; }
       const m = agg();
       const nx = new URLSearchParams(r.q); nx.set('p', pg + 1);
       const pv = new URLSearchParams(r.q); pv.set('p', pg - 1);
       res.innerHTML = `<div class="wp-grid">${list.map(c => tile(c, { qty: m.get(c.id)?.qty, add: true, sub: '#' + esc(c.localId || '') + ' · ' + esc((c.id || '').split('-')[0]).toUpperCase() })).join('')}</div>
-        <p class="wp-pager">${pg > 1 ? `<a class="cta ghost" href="#/catalogue?${pv}">‹ Précédent</a>` : ''}<span>Page ${pg}</span>${list.length === per ? `<a class="cta ghost" href="#/catalogue?${nx}">Suivant ›</a>` : ''}</p>`;
+        <p class="wp-pager">${pg > 1 ? `<a class="cta ghost" href="#/catalogue?${pv}">‹ Précédent</a>` : ''}<span>Page ${pg}</span>${rawLen === per ? `<a class="cta ghost" href="#/catalogue?${nx}">Suivant ›</a>` : ''}</p>`;
       say(list.length + ' cartes affichées');
     } catch (e) { const res = $('#wp-res'); if (res) res.innerHTML = errBox(e); }
     return;
@@ -458,10 +470,13 @@ async function vCatalogue(r) {
     const box = $('#wp-sets'); if (!box) return;
     const m = agg(), owned = {};
     m.forEach(e => { const s = e.card.setId; if (s) owned[s] = (owned[s] || 0) + 1; });
-    box.innerHTML = series.map(s => `<section class="wp-serie" data-s="${esc(s.name.toLowerCase())}"><h3>${esc(s.name)}</h3><div class="wp-sets">${s.sets.slice().reverse().map(x => {
+    const setCard = (x, sub) => {
       const tot = x.cardCount && (x.cardCount.official ?? x.cardCount.total), o = owned[x.id] || 0;
-      return `<a class="card wp-set" href="#/extension/${encodeURIComponent(x.id)}" data-k="${esc((x.name + ' ' + x.id).toLowerCase())}">${x.logo ? `<img src="${esc(logoUrl(x.logo))}" alt="" loading="lazy" decoding="async">` : ''}<b>${esc(x.name)}</b><span>${esc(x.id)}${tot ? ' · ' + tot + ' cartes' : ''}</span>${o ? `<span class="wp-prog" title="${o} cartes différentes possédées"><i style="width:${tot ? Math.min(100, o / tot * 100) : 100}%"></i></span><small>${o}${tot ? ' / ' + tot : ''} possédées</small>` : ''}</a>`;
-    }).join('')}</div></section>`).join('') || empty('Aucune extension', 'Le catalogue est vide pour cette langue.');
+      return `<a class="card wp-set${sub ? ' wp-subset' : ''}" href="#/extension/${encodeURIComponent(x.id)}" data-k="${esc((x.name + ' ' + x.id).toLowerCase())}">${x.logo ? `<img src="${esc(logoUrl(x.logo))}" alt="" loading="lazy" decoding="async">` : ''}<b>${esc(x.name)}</b><span>${esc(x.id)}${tot ? ' · ' + tot + ' cartes' : ''}</span>${o ? `<span class="wp-prog" title="${o} cartes différentes possédées"><i style="width:${tot ? Math.min(100, o / tot * 100) : 100}%"></i></span><small>${o}${tot ? ' / ' + tot : ''} possédées</small>` : ''}</a>`;
+    };
+    box.innerHTML = series.map(s => `<section class="wp-serie" data-s="${esc(s.name.toLowerCase())}"><h3>${esc(s.name)}</h3><div class="wp-sets">${groupSets(s.sets.slice().reverse()).map(g => g.subs.length
+      ? `<div class="wp-group" data-k="${esc((g.set.name + ' ' + g.set.id + ' ' + g.subs.map(y => y.name + ' ' + y.id).join(' ')).toLowerCase())}"><p class="wp-group-t">${esc(g.set.name)} et ${g.subs.length > 1 ? 'ses sous-ensembles' : 'son sous-ensemble'}</p><div class="wp-group-in">${setCard(g.set, false)}${g.subs.map(y => setCard(y, true)).join('')}</div></div>`
+      : setCard(g.set, false)).join('')}</div></section>`).join('') || empty('Aucune extension', 'Le catalogue est vide pour cette langue.');
   } catch (e) { const box = $('#wp-sets'); if (box) box.innerHTML = errBox(e); }
 }
 
@@ -557,7 +572,7 @@ function lotForm(meta, lot) {
   <input type="hidden" name="lot" value="${lot ? lot.id : ''}">
   <div class="wp-fg">
    <label class="wp-f"><span>Quantité</span><input name="qty" type="number" inputmode="numeric" min="1" max="9999" value="${lot ? lot.qty : 1}" required></label>
-   <label class="wp-f"><span>Langue</span><select name="lang">${Object.entries(LANGS).map(([k, v]) => `<option value="${k}"${(lot ? lot.lang : S.lang) === k ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
+   <label class="wp-f"><span>Langue de la carte</span><select name="lang">${Object.entries(LANGS).map(([k, v]) => `<option value="${k}"${(lot ? lot.lang : S.lang) === k ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
    <label class="wp-f"><span>Finition</span><select name="finish">${fin.map(k => `<option value="${k}"${(lot ? lot.finish : fin[0]) === k ? ' selected' : ''}>${FINISH[k]}</option>`).join('')}</select></label>
    <label class="wp-f"><span>État</span><select name="cond">${CONDS.map(([k, v]) => `<option value="${k}"${(lot ? lot.cond : 'NM') === k ? ' selected' : ''}>${k} · ${v}</option>`).join('')}</select></label>
    <label class="wp-f"><span>Prix d'achat unitaire (€)</span><input name="price" type="text" inputmode="decimal" placeholder="optionnel" value="${lot && lot.price != null ? String(lot.price).replace('.', ',') : ''}"></label>
@@ -595,7 +610,7 @@ function vCollection(r) {
   app.innerHTML = collectionHead(t) +
   (top.length ? `<section class="wp-top"><h3 class="wp-h">Les plus précieuses</h3><div class="wp-toprow">${top.map(e => tile(e.card, { qty: e.qty, price: e.eur, sub: esc(e.card.setName || '') })).join('')}</div></section>` : '') +
   `<div class="card wp-tools"><label class="wp-f wp-grow"><span>Rechercher dans ma collection</span><input type="search" data-f="q" value="${esc(r.q.get('q') || '')}" placeholder="Nom, numéro, extension…"></label>
-    ${sel('set', sets, fs, ['Extension', 'Toutes'])}${sel('rar', rars.map(x => [x, x]), fr, ['Rareté', 'Toutes'])}${sel('lang', lgs.map(x => [x, LANGS[x] || x]), fl, ['Langue', 'Toutes'])}${sel('fin', Object.entries(FINISH), ff, ['Finition', 'Toutes'])}${sel('sort', Object.entries(SORTS), sort, ['Trier par', null])}
+    ${sel('set', sets, fs, ['Extension', 'Toutes'])}${sel('rar', rars.map(x => [x, x]), fr, ['Rareté', 'Toutes'])}${sel('lang', lgs.map(x => [x, LANGS[x] || x]), fl, ['Langue des cartes', 'Toutes'])}${sel('fin', Object.entries(FINISH), ff, ['Finition', 'Toutes'])}${sel('sort', Object.entries(SORTS), sort, ['Trier par', null])}
     <label class="wp-chk"><input type="checkbox" data-f="dup" ${dup ? 'checked' : ''}> Doublons uniquement</label>
     <div class="filters wp-filters" role="group" aria-label="Affichage">${[['grid', 'Grille'], ['list', 'Liste']].map(([k, tx]) => `<button type="button" data-act="view" data-v="${k}" aria-pressed="${view === k}">${tx}</button>`).join('')}</div></div>
   <p class="note" id="wp-count">${NUM.format(list.length)} carte${list.length > 1 ? 's' : ''} affichée${list.length > 1 ? 's' : ''} sur ${NUM.format(all.length)}.</p>
@@ -802,7 +817,7 @@ document.addEventListener('change', ev => {
 document.addEventListener('input', ev => {
   const f = ev.target;
   if (f.matches && f.matches('input[data-f="q"]')) { clearTimeout(ft); ft = setTimeout(() => { const pos = f.selectionStart; setParams('q', f.value); const n = $('input[data-f="q"]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }, 220); }
-  else if (f.id === 'wp-setfilter') { const v = f.value.toLowerCase().trim(); $$('.wp-set').forEach(x => { x.hidden = !!v && !x.dataset.k.includes(v); }); $$('.wp-serie').forEach(s => { s.hidden = !$$('.wp-set', s).some(x => !x.hidden); }); }
+  else if (f.id === 'wp-setfilter') { const v = f.value.toLowerCase().trim(); $$('.wp-sets > .wp-set, .wp-sets > .wp-group').forEach(x => { x.hidden = !!v && !x.dataset.k.includes(v); }); $$('.wp-serie').forEach(s => { s.hidden = !$$('.wp-sets > *', s).some(x => !x.hidden); }); }
   else if (f.id === 'wp-inset') { clearTimeout(ft); ft = setTimeout(() => { const r = route(), p = new URLSearchParams(r.q); if (f.value) p.set('s', f.value); else p.delete('s'); p.delete('n'); history.replaceState(null, '', '#/extension/' + encodeURIComponent(r.parts[1]) + (p.toString() ? '?' + p : '')); render(true); const n = $('#wp-inset'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 250); }
 });
 

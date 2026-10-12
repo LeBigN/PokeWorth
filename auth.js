@@ -9,6 +9,12 @@ const configured = !!(cfg.supabaseUrl && cfg.supabaseAnonKey);
 const KEY = 'pw-auth';
 const VERQ = ((document.currentScript && document.currentScript.src.split('?v=')[1]) || '1');
 const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+/* méthodes réellement disponibles : jamais de bouton pour un service non configuré */
+const live = configured || (isLocal && !!window.PW_TEST_CLIENT);
+const pc = cfg.providers || { email: true };
+const providers = { email: live && pc.email !== false, google: live && !!pc.google, apple: live && !!pc.apple, qr: false };
+if (isLocal && window.PW_TEST_CLIENT && window.PW_TEST_PROVIDERS) Object.assign(providers, window.PW_TEST_PROVIDERS);
+const MIN_PW = 10;
 
 /* adresse de retour : uniquement un chemin interne du site (évite toute redirection ouverte) */
 function safeNext(n) {
@@ -66,6 +72,15 @@ const ERR = {
   flow_state_expired: 'La session de connexion a expiré. Recommencez depuis la page de connexion.',
   flow_state_not_found: 'La session de connexion a expiré. Recommencez depuis la page de connexion.',
   manual_linking_disabled: 'La liaison de comptes n\'est pas activée sur ce service.',
+  invalid_credentials: 'Adresse e-mail ou mot de passe incorrect.',
+  email_not_confirmed: 'Votre adresse e-mail n\'est pas encore confirmée. Ouvrez l\'e-mail de confirmation reçu à l\'inscription.',
+  weak_password: 'Mot de passe trop faible : choisissez-en un plus long ou moins courant.',
+  same_password: 'Le nouveau mot de passe doit être différent de l\'ancien.',
+  otp_expired: 'Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau.',
+  over_request_rate_limit: 'Trop de tentatives. Patientez quelques minutes avant de réessayer.',
+  over_email_send_rate_limit: 'Trop d\'e-mails envoyés. Patientez quelques minutes avant de réessayer.',
+  signup_disabled: 'Les inscriptions sont momentanément fermées.',
+  email_address_invalid: 'Cette adresse e-mail n\'est pas valide.',
 };
 function errText(code, desc) { return ERR[code] || (desc ? 'Connexion impossible : ' + String(desc).replace(/\+/g, ' ').slice(0, 160) : 'Connexion impossible. Réessayez.'); }
 async function signIn(provider, next) {
@@ -73,6 +88,33 @@ async function signIn(provider, next) {
   if (next) setNext(next);
   const c = await client();
   const { error } = await c.auth.signInWithOAuth({ provider, options: { redirectTo: location.origin + '/connexion.html' } });
+  if (error) throw error;
+}
+/* e-mail et mot de passe : le mot de passe n'est jamais stocké ni journalisé côté site ; Supabase le conserve haché (bcrypt) */
+const TERMS_VERSION = '2026-10-11';
+async function signUpEmail(email, password, marketing) {
+  const c = await client();
+  const { data, error } = await c.auth.signUp({ email, password, options: {
+    emailRedirectTo: location.origin + '/connexion.html',
+    data: { marketing_opt_in: !!marketing, terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION }
+  } });
+  if (error) throw error;
+  return data;
+}
+async function signInEmail(email, password) {
+  const c = await client();
+  const { data, error } = await c.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+async function resetRequest(email) {
+  const c = await client();
+  const { error } = await c.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/connexion.html?mode=reset' });
+  if (error) throw error;
+}
+async function updatePassword(password) {
+  const c = await client();
+  const { error } = await c.auth.updateUser({ password });
   if (error) throw error;
 }
 async function link(provider) {
@@ -100,5 +142,5 @@ function paintHeader() {
 }
 paintHeader();
 addEventListener('storage', e => { if (e.key === KEY) paintHeader(); });
-window.PW = { configured, client, user, signIn, link, signOut, require, hint, safeNext, setNext, takeNext, errText, paintHeader };
+window.PW = { configured, providers, MIN_PW, signUpEmail, signInEmail, resetRequest, updatePassword, client, user, signIn, link, signOut, require, hint, safeNext, setNext, takeNext, errText, paintHeader };
 })();
