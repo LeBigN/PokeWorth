@@ -1190,3 +1190,98 @@ a.sb:hover img{transform:translateY(-2px) scale(1.08)}
   .hero3-text h1{margin-bottom:12px}
   .hero3-vis .pokemon-fan{--pokemon-fan-card-w:clamp(120px,min(37vw,21svh),190px)}
 }
+
+/* =====================================================================
+   v13.11 · UN SEUL STYLE DE BOUTON, « verre liquide » (modèle : « Tout voir »)
+   Pilule lilas translucide, liseré lumineux, reflet qui suit le doigt/la souris,
+   rebond élastique au survol, écrasement au clic. Remplace tous les autres styles.
+   ===================================================================== */
+:root{--lq-r:999px}
+body .cta,body .cta.ghost,body .cta:not(.ghost),body button.cta,body .cta.danger,
+body .filters button,body .crumb a,body .crumb-bottom a,body .serie-link,body .more-news,body .news-more,
+body .nav .wrap>.nl-acct{
+  position:relative;isolation:isolate;overflow:hidden;
+  border:1px solid rgba(255,255,255,.32)!important;border-radius:var(--lq-r)!important;
+  background:
+    radial-gradient(120% 140% at 20% -30%,rgba(255,255,255,.38),rgba(255,255,255,0) 55%),
+    linear-gradient(180deg,rgba(176,150,255,.46),rgba(120,92,205,.50))!important;
+  color:#fff!important;font-weight:700;text-decoration:none;text-shadow:0 1px 2px rgba(20,8,60,.35);
+  -webkit-backdrop-filter:blur(10px) saturate(180%);backdrop-filter:blur(10px) saturate(180%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.75),
+    inset 0 -1px 1px rgba(255,255,255,.25),
+    inset 0 -12px 18px -12px rgba(255,255,255,.38),
+    inset 0 0 16px rgba(255,255,255,.10),
+    0 10px 26px -12px rgba(8,3,24,.6)!important;
+  transition:transform .55s cubic-bezier(.2,1.5,.35,1),box-shadow .3s ease,filter .3s ease;
+  --mx:30%;--my:-10%;
+}
+/* le liseré dégradé hérité de l'ancien style est remplacé par la bordure ci-dessus */
+body .cta::before,body .filters button::before,body .crumb a::before,body .crumb-bottom a::before,
+body .serie-link::before,body .more-news::before,body .news-more::before,body .nav .wrap>.nl-acct::before{display:none}
+/* reflet liquide : suit le pointeur, s'étire au survol */
+body .cta::after,body .filters button::after,body .crumb a::after,body .crumb-bottom a::after,
+body .serie-link::after,body .more-news::after,body .news-more::after,body .nav .wrap>.nl-acct::after{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:.75;transition:opacity .3s,background-position .6s;
+  background:radial-gradient(90px 46px at var(--mx) var(--my),rgba(255,255,255,.55),rgba(255,255,255,0) 70%)}
+body .serie-link::after,body .more-news::after{position:static;content:"\2192";background:none;opacity:1;z-index:auto;inset:auto;margin-left:8px}
+body .cta:hover,body .filters button:hover,body .crumb a:hover,body .crumb-bottom a:hover,body .serie-link:hover,
+body .more-news:hover,body .news-more:hover,body .nav .wrap>.nl-acct:hover{
+  transform:translateY(-2px) scale(1.045,1.07);filter:brightness(1.08) saturate(1.1);color:#fff}
+body .cta:active,body .filters button:active,body .crumb a:active,body .crumb-bottom a:active,body .serie-link:active,
+body .more-news:active,body .news-more:active,body .nav .wrap>.nl-acct:active{
+  transform:scale(1.04,.92);transition-duration:.12s}
+body .filters button[aria-pressed="true"]{
+  background:
+    radial-gradient(120% 140% at 20% -30%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),
+    linear-gradient(180deg,rgba(200,178,255,.66),rgba(140,110,230,.70))!important;
+  border-color:rgba(255,255,255,.55)!important}
+body .cta.danger{background:
+    radial-gradient(120% 140% at 20% -30%,rgba(255,255,255,.34),rgba(255,255,255,0) 55%),
+    linear-gradient(180deg,rgba(235,100,120,.62),rgba(176,48,72,.66))!important}
+body .cta.off,body button.cta.off{opacity:.5;filter:saturate(.6)}
+body .cta.off:hover{transform:none;filter:saturate(.6)}
+body .filters button{padding:8px 18px}
+body .nav .wrap>.nl-acct{box-shadow:inset 0 1px 1px rgba(255,255,255,.75),inset 0 -10px 16px -10px rgba(255,255,255,.35),0 8px 20px -10px rgba(8,3,24,.6)!important}
+@media (prefers-reduced-motion:reduce){body .cta,body .filters button,body .crumb a,body .crumb-bottom a,body .serie-link,body .more-news,body .news-more,body .nav .wrap>.nl-acct{transition:none}
+  body .cta:hover,body .filters button:hover,body .news-more:hover,body .nav .wrap>.nl-acct:hover{transform:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body .cta,body .filters button,body .crumb a,body .crumb-bottom a,body .serie-link,body .more-news,body .news-more,body .nav .wrap>.nl-acct{background:linear-gradient(180deg,#8a6fe0,#6a4fc0)!important}}
+
+/* =====================================================================
+   v13.12 · BOUTON UNIQUE (modèle : « Tout voir ») : pilule translucide, fond blanc 12 %, liseré blanc 40 %, texte blanc gras
+   Remplace le style « verre liquide » de la v13.11 : même couleur et même visuel partout.
+   ===================================================================== */
+body .cta,body .cta.ghost,body .cta:not(.ghost),body button.cta,body .cta.danger,
+body .filters button,body .crumb a,body .crumb-bottom a,body .serie-link,body .more-news,body .news-more,
+body .nav .wrap>.nl-acct{
+  background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:999px!important;
+  box-shadow:none!important;text-shadow:none!important;color:#fff!important;font-weight:700;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important;overflow:visible;
+  transition:background-color .2s,transform .2s}
+body .cta::after,body .filters button::after,body .crumb a::after,body .crumb-bottom a::after,body .news-more::after,body .nav .wrap>.nl-acct::after{display:none!important}
+body .cta:hover,body .filters button:hover,body .crumb a:hover,body .crumb-bottom a:hover,body .serie-link:hover,
+body .more-news:hover,body .news-more:hover,body .nav .wrap>.nl-acct:hover{
+  background:rgba(255,255,255,.22)!important;transform:translateY(-1px);filter:none}
+body .cta:active,body .filters button:active,body .crumb a:active,body .crumb-bottom a:active,body .serie-link:active,
+body .more-news:active,body .news-more:active,body .nav .wrap>.nl-acct:active{transform:translateY(0)}
+body .filters button[aria-pressed="true"]{background:rgba(255,255,255,.26)!important;border-color:rgba(255,255,255,.6)!important}
+body .cta.off,body button.cta.off{opacity:.5;filter:none}
+body .cta.off:hover{transform:none;background:rgba(255,255,255,.12)!important}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body .cta,body .filters button,body .crumb a,body .crumb-bottom a,body .serie-link,body .more-news,body .news-more,body .nav .wrap>.nl-acct{background:rgba(255,255,255,.12)!important}}
+
+/* v13.13 · bulles non cliquables (étiquettes, pastilles, statuts) : même style que les boutons */
+body .tag,body .tag.t-sortie,body .tag.t-soon,body .pill,body .pill-ok,body .pill-soon,body .pill-app,
+body .sx-badge,body [class*="sx-badge sx-"],body .plan-flag,body .soon-badge{
+  background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.4)!important;color:#fff!important;
+  font-weight:700;box-shadow:none!important;text-shadow:none!important;
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important}
+body .tag::before,body .tag::after,body .pill::before,body .pill::after{display:none!important}
+body .pill .dot{background:#fff}
+body .b-tabs b,body .b-tabs b:first-child{background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.4)!important;color:#fff!important;font-weight:700;box-shadow:none!important;border-radius:999px}
+
+/* v13.16 · maquettes de la section Fonctionnalités : plus grandes pour rester lisibles */
+.fx-vis{width:clamp(200px,27vw,320px)}
+.fx-text>p{font-size:clamp(17px,1.5vw,19px);line-height:1.6}
+@media (max-width:900px){.fx-vis{width:min(64vw,300px)}}
