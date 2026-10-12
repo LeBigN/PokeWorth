@@ -1059,3 +1059,51 @@ footer .wrap.w12{display:block}
 .pw-or::before,.pw-or::after{content:"";flex:1;height:1px;background:var(--line)}
 .pw-or span{flex:none}
 .pw-btns [hidden]{display:none}
+
+/* ===== v13.2 · barre de navigation pleine largeur (logo à gauche, liens au centre, bouton à droite) + fond de l'app ===== */
+body::before{background:url(fond-app.jpg) center/cover no-repeat,#100826}
+header.nav{position:sticky;top:0;z-index:20;pointer-events:auto;background:rgba(12,6,30,.78);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
+.nav .wrap{width:min(1200px,100% - 40px);max-width:none;height:80px;margin:0 auto;padding:0;border-radius:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;justify-content:normal;gap:12px}
+.nav .wrap::before{display:none}
+.nav-brand{display:inline-flex;align-items:center;justify-self:start;margin:0;min-height:44px}
+.nav-brand img{display:block;height:auto;width:130px;aspect-ratio:1300/301}
+.nav .nav-menu{justify-self:center;gap:4px}
+.nav .nl,.nav .nav-menu>a,.nav .nav-menu .nl-dd{font-size:15px;padding:9px 14px;color:rgba(255,255,255,.9);background:none!important;box-shadow:none!important}
+.nav .nl:hover,.nav .nl-dd:hover,.nav .nav-menu>a:hover{color:#fff;background:none!important;text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px;text-decoration-color:rgba(201,176,255,.8)}
+.nav .nl[aria-current],.nav .nl-dd[aria-current],.nav .nav-menu>a[aria-current]{color:#fff;text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px;text-decoration-color:#c9b0ff}
+.nav .wrap>.nl-acct{justify-self:end;margin:0;padding:11px 22px;border-radius:999px;background:#b9a6ff!important;color:#1a0d3c!important;font-weight:700;text-decoration:none!important;box-shadow:none!important}
+.nav .wrap>.nl-acct:hover{background:#cfc0ff!important}
+.nav-toggle{justify-self:end}
+.hero3{margin-top:0;padding-top:clamp(20px,4vw,48px)}
+html{scroll-padding-top:84px}
+@media (max-width:959px){
+  .nav .wrap{height:64px;width:calc(100% - 24px);display:flex;justify-content:space-between}
+  .nav .wrap>.nl-acct{margin-left:auto;padding:9px 16px}
+  .nav-brand img{width:112px}
+  .nav .nav-menu{top:calc(100% + 1px);left:-12px;right:-12px;border-radius:0 0 24px 24px}
+  html{scroll-padding-top:68px}
+}
+@media (min-width:1024px){.hero3{min-height:calc(100vh - 80px);min-height:calc(100svh - 80px)}}
+@media (min-width:960px) and (max-width:1100px){.nav .nl,.nav .nav-menu>a,.nav .nav-menu .nl-dd{padding:9px 9px;font-size:14px}.nav-brand img{width:108px}}
+.hero3{position:relative;display:flex;align-items:center;padding-bottom:clamp(28px,5vw,64px);text-align:left}
+.hero3-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);align-items:center;gap:clamp(20px,4vw,64px)}
+.hero3-text h1{margin:0 0 18px;max-width:15ch;font-size:clamp(34px,4.6vw,60px);line-height:1.1;letter-spacing:-1.4px;text-wrap:balance}
+.hero3-text .lead{max-width:46ch;margin:0;font-size:clamp(16.5px,1.5vw,19px);line-height:1.55;color:rgba(255,255,255,.86);text-wrap:balance}
+.hero3-text .hero-cta{margin-top:26px}
+.hero3-text .hero-status{justify-content:flex-start;margin-top:18px}
+.hero3-vis{position:relative;min-width:0}
+.hero3-vis .pokemon-fan{--pokemon-fan-card-w:clamp(190px,17vw,270px)}
+@media (max-width:1023px){
+  .hero3{min-height:0}
+  .hero3-grid{grid-template-columns:1fr;text-align:center}
+  .hero3-text h1,.hero3-text .lead{margin-inline:auto}
+  .hero3-text .hero-cta,.hero3-text .hero-status{justify-content:center}
+  .hero3-vis .pokemon-fan{--pokemon-fan-card-w:170px}
+}
+@media (max-width:767px){.hero3-vis .pokemon-fan{--pokemon-fan-card-w:clamp(125px,36vw,145px)}}
+.nav nav a[aria-current]::before,.nav .nl::before,.nav .nl-dd::before{display:none!important}
+.nav nav a[aria-current],.nav .nav-menu>a[aria-current]{background:none!important;box-shadow:none!important;border:0!important}
+@media (max-width:959px){
+  .nav .nav-menu{justify-self:stretch;width:auto}
+  .nav .nav-menu>a[aria-current]{background:rgba(255,255,255,.12)!important}
+}
