@@ -42,7 +42,7 @@ body{
 body::before{ /* fond fixe : dégradé violet profond + étoiles */
   content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    url(stars.webp) 0 0/1100px 1100px,
+    url(images/backgrounds/stars.webp) 0 0/1100px 1100px,
     radial-gradient(1100px 760px at 64% -4%,rgba(88,56,170,.62),transparent 70%),
     radial-gradient(520px 700px at -6% 30%,rgba(8,3,20,.70),transparent 75%),
     radial-gradient(900px 600px at 100% 100%,rgba(6,2,16,.78),transparent 72%),
@@ -1061,7 +1061,7 @@ footer .wrap.w12{display:block}
 .pw-btns [hidden]{display:none}
 
 /* ===== v13.2 · barre de navigation pleine largeur (logo à gauche, liens au centre, bouton à droite) + fond de l'app ===== */
-body::before{background:url(fond-app.jpg) center/cover no-repeat,#100826}
+body::before{background:url(images/backgrounds/fond-app.jpg) center/cover no-repeat,#100826}
 header.nav{position:sticky;top:0;z-index:20;pointer-events:auto;background:rgba(12,6,30,.78);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%)}
 .nav .wrap{width:min(1200px,100% - 40px);max-width:none;height:80px;margin:0 auto;padding:0;border-radius:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;justify-content:normal;gap:12px}
 .nav .wrap::before{display:none}
@@ -1394,3 +1394,13 @@ section[tabindex="-1"]:focus,section[tabindex="-1"]:focus-visible{outline:none}
 
 /* v13.28 : tiret centré (Accès à vie, équivalent par mois) */
 td.td-dash{text-align:center}
+
+/* v13.30 : bloc « Inclus dans toutes les formules Premium » (Tarifs) et carte Web App restante */
+.incl{max-width:760px;margin:16px auto 0;padding:24px 28px}
+.incl h3{margin:0 0 4px;font-size:clamp(18px,2.2vw,21px)}
+.incl ul{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:9px 28px}
+.incl li{padding-left:28px;position:relative;font-size:16px;line-height:1.4}
+.incl li::before{content:"";position:absolute;left:2px;top:.55em;width:14px;height:8px;border-left:2.2px solid var(--acc);border-bottom:2.2px solid var(--acc);transform:rotate(-45deg) translateY(-50%)}
+@media (max-width:700px){.incl{padding:22px 20px}.incl ul{grid-template-columns:1fr}}
+.b-body .b-card:last-child:nth-child(odd){grid-column:1/-1}
+.nw{white-space:nowrap}

@@ -176,7 +176,7 @@
           if (thumb(n, big) !== n.image) im.onerror = function () { im.onerror = null; im.src = n.image; };
           im.src = thumb(n, big); box.appendChild(im);
         } else {
-          var im2 = el("img"); im2.alt = ""; im2.src = "logo-cube-hd.webp"; im2.width = 64; im2.height = 74; box.appendChild(im2);
+          var im2 = el("img"); im2.alt = ""; im2.src = "images/logos/logo-cube-hd.webp"; im2.width = 64; im2.height = 74; box.appendChild(im2);
         }
         return box;
       };
