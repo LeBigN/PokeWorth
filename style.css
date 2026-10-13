@@ -1391,3 +1391,6 @@ section[tabindex="-1"]:focus,section[tabindex="-1"]:focus-visible{outline:none}
 .nav .wrap{width:min(var(--cw),100% - 40px)}
 .sec + .sec::before{width:min(var(--cw),100% - 40px)}
 @media (min-width:1024px){.hero3{min-height:calc(100svh/var(--z) - 80px)}}
+
+/* v13.28 : tiret centré (Accès à vie, équivalent par mois) */
+td.td-dash{text-align:center}
