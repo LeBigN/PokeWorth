@@ -224,7 +224,7 @@ details[open] summary::after{content:"–"}
 .phone-fig{container-type:inline-size}
 .phone{position:relative;padding:1.9cqw;border-radius:16.5cqw;background:linear-gradient(145deg,#8a8398 0%,#3b3550 18%,#1c1830 50%,#4a4462 82%,#8a8398 100%);box-shadow:0 0 0 .4cqw rgba(0,0,0,.55),0 26px 50px -18px rgba(5,2,16,.85),inset 0 0 0 .35cqw rgba(255,255,255,.28)}
 .phone::before{content:"";position:absolute;z-index:2;top:4.7cqw;left:50%;width:31cqw;height:9.2cqw;transform:translateX(-50%);border-radius:99px;background:#030208}
-.phone img{display:block;width:100%;height:auto;aspect-ratio:660/1434;border-radius:14.6cqw;background:#1a1038}
+.phone img{display:block;width:100%;height:auto;aspect-ratio:960/2085;border-radius:14.6cqw;background:#1a1038}
 .phone-fig figcaption{margin-top:12px;font-size:13px;font-weight:700;color:var(--muted)}
 .teaser-note{margin:10px auto 0;text-align:center;font-size:12.5px;color:var(--dim)}
 
@@ -1285,3 +1285,61 @@ body .b-tabs b,body .b-tabs b:first-child{background:rgba(255,255,255,.12)!impor
 .fx-vis{width:clamp(200px,27vw,320px)}
 .fx-text>p{font-size:clamp(17px,1.5vw,19px);line-height:1.6}
 @media (max-width:900px){.fx-vis{width:min(64vw,300px)}}
+
+/* =====================================================================
+   v13.17 · corrections mobile
+   1 · menu déroulant : même fond que la barre du haut (opaque, pour ne rien laisser transparaître)
+   2 · « À propos » : fermé par défaut, ouverture / fermeture animées au toucher
+   ===================================================================== */
+@media (max-width:959px){
+  .nav .nav-menu{background:#1a0f34!important;border:0!important;border-top:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 24px 40px -18px rgba(4,1,16,.8)!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .nav .nav-menu .nl-dd{display:flex!important;width:100%;justify-content:space-between;background:none;border:0;cursor:pointer;color:rgba(255,255,255,.9);padding:13px 16px;font-size:16px;font-weight:700;border-radius:18px;min-height:48px}
+  .nav .nav-menu .nl-dd svg{width:18px;height:18px}
+  .nav .nav-sub{position:static!important;transform:none!important;display:flex!important;flex-direction:column;min-width:0;padding:0!important;margin:0;gap:2px;
+    background:none!important;border:0!important;box-shadow:none!important;border-radius:0;
+    max-height:0;opacity:0;overflow:hidden;visibility:hidden;
+    transition:max-height .38s cubic-bezier(.4,0,.2,1),opacity .28s ease,visibility 0s linear .38s}
+  .nav .nav-dd.open .nav-sub{max-height:420px;opacity:1;visibility:visible;transition:max-height .38s cubic-bezier(.4,0,.2,1),opacity .3s ease .05s,visibility 0s}
+  .nav .nav-sub a{padding:12px 16px 12px 30px;font-size:15.5px;color:rgba(255,255,255,.82)}
+  html:not(.js) .nav .nav-sub{max-height:none;opacity:1;visibility:visible}
+}
+@media (prefers-reduced-motion:reduce){.nav .nav-sub{transition:none!important}}
+
+/* 3 · tableaux comparatifs des tarifs : tiennent dans la largeur de l'écran, sans défilement ni texte coupé */
+@media (max-width:640px){
+  .tbl:has(table.cmp){overflow:visible;border-radius:16px}
+  .tbl table.cmp{min-width:0!important;width:100%;table-layout:fixed;font-size:12.5px;line-height:1.35}
+  .tbl table.cmp th,.tbl table.cmp td{padding:9px 7px;overflow-wrap:anywhere;hyphens:auto}
+  .tbl table.cmp thead th{font-size:11.5px;line-height:1.25;padding:9px 7px}
+  .tbl table.cmp th:first-child{width:27%}
+}
+@media (max-width:360px){
+  .tbl table.cmp{font-size:11.5px}.tbl table.cmp th,.tbl table.cmp td{padding:8px 5px}.tbl table.cmp thead th{font-size:10.5px}
+}
+
+/* 4 · pastille « Meilleur prix par mois » : opaque, couleur du bloc Premium annuel */
+body .plan-flag{background:#603eaa!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important;opacity:1;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+/* 6 · grille des fonctionnalités : 7 cartes réparties proprement (la dernière ligne est centrée) */
+.fx-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap,18px)}
+.fx-grid>.fx-card{flex:1 1 calc(33.333% - 18px);max-width:calc(33.333% - 12px);min-width:260px}
+@media (max-width:820px){.fx-grid>.fx-card{flex:1 1 calc(50% - 18px);max-width:calc(50% - 9px);min-width:0}}
+@media (max-width:560px){.fx-grid>.fx-card{flex:1 1 100%;max-width:100%}}
+
+/* 7 · section « Dernières versions » : mention centrée */
+.sub-h{text-align:center}
+.ver-soon{display:flex;justify-content:center;align-items:center;margin:22px auto 0;width:fit-content;padding:14px 34px;border-radius:999px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-weight:700;font-size:clamp(16px,2.2vw,19px);letter-spacing:.2px}
+@media (max-width:959px){.nav .nav-menu .nl-dd{padding-left:14px!important;padding-right:14px!important}}
+@media (max-width:640px){
+  .tbl table.cmp th:first-child{width:32%}
+  .tbl table.cmp th,.tbl table.cmp td{overflow-wrap:break-word;word-break:normal}
+  .tbl table.cmp tbody th{font-size:12px}
+}
+@media (max-width:360px){.tbl table.cmp tbody th{font-size:11.5px}.tbl table.cmp th:first-child{width:34%}}
+@media (max-width:640px){.tbl table.cmp thead th{overflow-wrap:normal;hyphens:auto;-webkit-hyphens:auto}}
+/* pied de page : les 4 icônes de réseaux restent sur une seule ligne */
+.social{flex-wrap:nowrap;gap:8px}
+a.sb{width:34px;height:34px}
+a.sb img{width:30px;height:30px}

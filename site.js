@@ -21,6 +21,7 @@
     function setMenu(open, focusBack) {
       nav.classList.toggle("open", open);
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      if (!open && dd) { pinned = false; dd.classList.remove("open"); if (ddBtn) ddBtn.setAttribute("aria-expanded", "false"); }
       if (!open && focusBack) toggle.focus();
     }
     var pinned = false;   // sous-menu ouvert par un clic ou au clavier (il reste ouvert jusqu'à un nouveau clic)
