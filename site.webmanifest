@@ -1,7 +1,7 @@
 {
   "name": "Pokéworth",
   "short_name": "Pokéworth",
-  "description": "Suivi de la valeur de votre collection de scellés Pokémon",
+  "description": "suivi de la valeur de ta collection de scellés Pokémon",
   "lang": "fr",
   "start_url": "index.html",
   "display": "browser",

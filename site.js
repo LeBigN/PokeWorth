@@ -136,7 +136,7 @@
     b.addEventListener("click", function () {
       var v = b.getAttribute("data-copy");
       function ok() { if (swMsg) swMsg.textContent = "Code " + v + " copié."; }
-      function ko() { if (swMsg) swMsg.textContent = "Copie impossible : sélectionnez le code " + v + " affiché à côté de la pastille."; }
+      function ko() { if (swMsg) swMsg.textContent = "Copie impossible : sélectionne le code " + v + " affiché à côté de la pastille."; }
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, ko);
       else ko();
     });
