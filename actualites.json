@@ -16,16 +16,10 @@
           "large": true
         },
         {
-          "nom": "ETB Méga-Rayquaza",
+          "nom": "ETB Méga-Rayquaza & ETB Pokémon Center",
           "detail": "Coffret Dresseur d'Élite · promo AR Kyogre (MEP 117)",
           "image": "prod-etb-mega-rayquaza.webp",
-          "alt": "Coffret Dresseur d'Élite Méga-Rayquaza"
-        },
-        {
-          "nom": "ETB Pokémon Center",
-          "detail": "Version exclusive Pokémon Center",
-          "image": "prod-etb-pokemon-center.webp",
-          "alt": "Elite Trainer Box exclusive Pokémon Center"
+          "alt": "Coffrets Dresseur d'Élite Méga-Rayquaza et Pokémon Center"
         },
         {
           "nom": "Displays",
