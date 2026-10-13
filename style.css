@@ -1424,3 +1424,6 @@ td.td-dash{text-align:center}
 .f-legal{text-align:center;font-size:12.5px;text-wrap:balance}
 @media (min-width:1100px){.f-legal{font-size:calc((100vw - 50px)/96);white-space:nowrap;text-wrap:initial}}
 @media (min-width:1280px){.f-legal{font-size:12.5px}}
+
+/* v13.33 : bandeau Premium sous la note de lancement */
+.incl.incl-top{margin:18px auto 30px}
