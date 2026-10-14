@@ -444,7 +444,7 @@ a.cat-serie:hover{box-shadow:0 0 0 1px var(--acc)}
 
 /* v9.3 logo d'accueil */
 .hero-brand{line-height:0;margin:0 0 6px}
-.hero-brand img{display:block;margin-inline:auto;width:min(380px,100%);height:auto;aspect-ratio:638/176}
+.hero-brand img{display:block;margin-inline:auto;width:min(380px,100%);height:auto;aspect-ratio:1300/301}
 @media (max-width:560px){.hero-brand{margin-bottom:0}}
 
 /* v9.3 barre du haut : verre liquide */
@@ -684,7 +684,7 @@ h3.wp-h{margin-top:26px}
 .pw-box h1{font-size:clamp(26px,5vw,34px);margin:14px 0 8px;text-wrap:balance}
 .pw-box .sub{text-wrap:balance;margin:0 auto 24px;max-width:36ch}
 .pw-logolink{display:inline-block}
-.pw-logo{width:min(220px,70%);height:auto;aspect-ratio:638/176}
+.pw-logo{width:min(220px,70%);height:auto;aspect-ratio:1300/301}
 .pw-btns{display:grid;gap:12px;margin:0 auto;max-width:340px}
 .pw-btns-s{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));max-width:none;margin-top:12px}
 .pw-oauth{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid #747775;background:#fff;color:#1f1f1f;font:500 15px/1 Roboto,"Nunito",system-ui,sans-serif;cursor:pointer;transition:box-shadow .2s,transform .1s,opacity .2s}
