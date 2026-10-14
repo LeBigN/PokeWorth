@@ -1177,7 +1177,9 @@ a.store-badge:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
 .news-more[hidden]{display:none}
 
 /* v13.8 · réseaux sociaux : icônes seules, sans bulle */
-a.sb,a.sb:hover,a.sb:active{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;width:40px;height:40px;border-radius:12px}
+a.sb,a.sb:hover,a.sb:active{background:none!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* v13.37 : la taille ne dépend plus de l'état (:hover/:active l'imposaient à 40 px et décalaient tout le pied de page) */
+a.sb{width:40px;height:40px;border-radius:12px}
 a.sb::before,a.sb::after{display:none!important}
 a.sb img{width:34px;height:34px;transition:transform .2s}
 a.sb:hover img{transform:translateY(-2px) scale(1.08)}
