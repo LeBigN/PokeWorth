@@ -149,14 +149,23 @@
     if (D) {
       var MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
       var fmt = function (d) { var p = d.split("-"); return +p[2] + " " + MOIS[+p[1] - 1] + " " + p[0]; };
-      var today = new Date(); today.setHours(0, 0, 0, 0);
-      var daysTo = function (d) { return Math.round((new Date(d + "T00:00:00") - today) / 864e5); };
+      /* jour courant en heure de Paris (YYYY-MM-DD), puis écart en jours calendaires : fiable au changement de mois, d'année et d'heure */
+      var parisDay = function () { try { return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); } catch (e) { var t = new Date(); return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2) + "-" + ("0" + t.getDate()).slice(-2); } };
+      var dayNum = function (d) { var p = d.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / 864e5; };
+      var todayNum = dayNum(parisDay());
+      var daysTo = function (d) { return Math.round(dayNum(d) - todayNum); };
       var upcoming = function (n) { return n.type === "sortie" && daysTo(n.date) >= 0; };
-      var items = D.actualites.slice().sort(function (a, b) {
-        if (upcoming(a) !== upcoming(b)) return upcoming(a) ? -1 : 1;
-        if (upcoming(a)) return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
-        return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
-      });
+      /* une sortie reste visible toute sa journée, puis disparaît de la liste le lendemain (elle reste dans actualites.json) */
+      var compute = function () {
+        return D.actualites.map(function (n, i) { return { n: n, i: i }; }).filter(function (x) { return !(x.n.type === "sortie" && daysTo(x.n.date) < 0); }).sort(function (a, b) {
+          var ua = upcoming(a.n), ub = upcoming(b.n);
+          if (ua !== ub) return ua ? -1 : 1;
+          if (a.n.date !== b.n.date) return ua ? (a.n.date < b.n.date ? -1 : 1) : (a.n.date < b.n.date ? 1 : -1);
+          return a.i - b.i;
+        }).map(function (x) { return x.n; });
+      };
+      var items = compute();
+      var STATUT = { confirme: "Confirmé", revendeur: "Annoncé par revendeur", a_confirmer: "À confirmer", report: "Report possible" };
       var catLabel = {}; D.categories.forEach(function (c) { catLabel[c.id] = c.label; });
       var readMin = function (n) {
         var t = [n.titre, n.texte].concat(n.points || []).concat((n.produits || []).map(function (p) { return (p.nom || "") + " " + (p.detail || ""); })).join(" ");
@@ -186,11 +195,12 @@
         var k = daysTo(n.date);
         if (n.type === "sortie" && k > 0) m.appendChild(el("span", "tag t-soon", "J-" + k));
         else if (n.type === "sortie" && k === 0) m.appendChild(el("span", "tag t-soon", "Aujourd'hui"));
+        if (n.type === "sortie" && STATUT[n.statut]) m.appendChild(el("span", "tag", STATUT[n.statut]));
         return m;
       };
       var foot = function (n) {
         var f = el("div", "nc-foot");
-        var t = el("time", "", (n.type === "sortie" && daysTo(n.date) > 0 ? "Sortie le " : "") + fmt(n.date)); t.dateTime = n.date;
+        var t = el("time", "", n.date_label ? n.date_label : (n.type === "sortie" && daysTo(n.date) > 0 ? "Sortie le " : "") + fmt(n.date)); t.dateTime = n.date;
         f.appendChild(t); f.appendChild(el("span", "", readMin(n) + " min de lecture"));
         return f;
       };
@@ -227,21 +237,37 @@
       more.type = "button";
       more.addEventListener("click", function () { expanded = !expanded; render(); if (!expanded) { grid.scrollIntoView({ block: "nearest" }); } });
       grid.parentNode.insertBefore(more, grid.nextSibling);
-      var counts = { all: items.length };
-      items.forEach(function (n) { counts[n.type] = (counts[n.type] || 0) + 1; });
-      var cats = [["all", "Tout"]].concat(D.categories.filter(function (c) { return counts[c.id]; }).map(function (c) { return [c.id, c.label]; }));
-      cats.forEach(function (c) {
-        var b = el("button", "", c[1] + " (" + counts[c[0]] + ")");
-        b.type = "button"; b.setAttribute("aria-pressed", c[0] === active ? "true" : "false"); b.setAttribute("data-filter", c[0]);
-        b.addEventListener("click", function () {
-          active = c[0]; expanded = false;
-          $$("button", filtersBox).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-          render();
-          status.textContent = counts[active] + (counts[active] > 1 ? " articles affichés" : " article affiché") + " : " + c[1];
+      var counts, cats;
+      var buildFilters = function () {
+        counts = { all: items.length };
+        items.forEach(function (n) { counts[n.type] = (counts[n.type] || 0) + 1; });
+        cats = [["all", "Tout"]].concat(D.categories.filter(function (c) { return counts[c.id]; }).map(function (c) { return [c.id, c.label]; }));
+        if (!cats.some(function (c) { return c[0] === active; })) active = "all";
+        filtersBox.textContent = "";
+        cats.forEach(function (c) {
+          var b = el("button", "", c[1] + " (" + counts[c[0]] + ")");
+          b.type = "button"; b.setAttribute("aria-pressed", c[0] === active ? "true" : "false"); b.setAttribute("data-filter", c[0]);
+          b.addEventListener("click", function () {
+            active = c[0]; expanded = false;
+            $$("button", filtersBox).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+            render();
+            status.textContent = counts[active] + (counts[active] > 1 ? " articles affichés" : " article affiché") + " : " + c[1];
+          });
+          filtersBox.appendChild(b);
         });
-        filtersBox.appendChild(b);
-      });
-      if (cats.length < 3) filtersBox.hidden = true;   /* une seule catégorie réelle : le filtre n'a pas d'intérêt */
+        filtersBox.hidden = cats.length < 3;   /* une seule catégorie réelle : le filtre n'a pas d'intérêt */
+      };
+      buildFilters();
+      /* page laissée ouverte : au changement de jour (heure de Paris), tri, masquage, compteurs et badges J-X sont recalculés, sans requête réseau */
+      var lastDay = parisDay();
+      var refresh = function () {
+        var d = parisDay();
+        if (d === lastDay) return;
+        lastDay = d; todayNum = dayNum(d); items = compute(); buildFilters(); render();
+      };
+      setInterval(refresh, 30000);
+      document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
+      window.addEventListener("focus", refresh);
       render();
     }
   }

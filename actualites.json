@@ -60,7 +60,9 @@
           "alt": "Boîtier Stratégies et Combat"
         }
       ],
-      "serie": "regne-delta"
+      "serie": "regne-delta",
+      "statut": "confirme",
+      "verifie": "2026-10-26"
     },
     {
       "date": "2026-11-13",
@@ -68,7 +70,9 @@
       "titre": "Sortie : Tripack Collection autocollant réajustable",
       "texte": "Noadkoko d'Alola / Lucario. Sortie décalée du 16 septembre au 13 novembre. 3 boosters, 1 carte promo et 1 page d'autocollants réajustables.",
       "image": "images/sorties/sortie-tripack-autocollant-hd.webp",
-      "image_alt": "Tripacks Collection autocollant réajustable 30e anniversaire : Noadkoko d'Alola et Lucario"
+      "image_alt": "Tripacks Collection autocollant réajustable 30e anniversaire : Noadkoko d'Alola et Lucario",
+      "statut": "a_confirmer",
+      "verifie": "2026-10-26"
     },
     {
       "date": "2026-10-16",
@@ -76,23 +80,40 @@
       "titre": "Sortie : Pokébox Amphinobi-ex / Nymphali-ex",
       "texte": "30e anniversaire. Sortie le 16 octobre (16 septembre sur Amazon). 4 boosters et 1 carte promo : Amphinobi-ex (MEP 099) ou Nymphali-ex (MEP 100).",
       "image": "images/sorties/sortie-pokebox-amphinobi-nymphali-hd.webp",
-      "image_alt": "Pokébox 30e anniversaire : Amphinobi-ex et Nymphali-ex"
+      "image_alt": "Pokébox 30e anniversaire : Amphinobi-ex et Nymphali-ex",
+      "statut": "revendeur",
+      "verifie": "2026-10-26"
     },
     {
       "date": "2026-10-30",
       "type": "sortie",
       "titre": "Sortie : Deck Combat Mentali-ex / Noctali-ex",
-      "texte": "30e anniversaire. Deck de 60 cartes brillantes, 1 carte promo (Victini MEP 102 ou Zeraora MEP 103), 1 étui pour deck, 1 pièce et 1 tapis de jeu.",
+      "texte": "30e anniversaire. Deck de 60 cartes brillantes, 1 carte promo (Victini MEP 102 ou Zeraora MEP 103), 1 étui pour deck, 1 pièce et 1 tapis de jeu. Date annoncée par les revendeurs : le 30 octobre (certains sites indiquent le 6 novembre) — à confirmer.",
       "image": "images/sorties/sortie-deck-combat-mentali-noctali-hd.webp",
-      "image_alt": "Deck Combat 30e anniversaire : Mentali-ex et Noctali-ex"
+      "image_alt": "Deck Combat 30e anniversaire : Mentali-ex et Noctali-ex",
+      "statut": "revendeur",
+      "verifie": "2026-10-26"
     },
     {
       "date": "2026-11-06",
       "type": "sortie",
-      "titre": "Sortie : Coffret Collection avec figurine Mewtwo / Mew",
-      "texte": "30e anniversaire. 5 boosters, 1 carte promo (Mewtwo MEP 104 ou Mew MEP 105) et 1 figurine de Mewtwo ou Mew.",
+      "titre": "Sortie : Coffret Collection avec figurine Mew",
+      "texte": "30e anniversaire. 5 boosters, 1 carte promo (Mew MEP 105) et 1 figurine de Mew.",
       "image": "images/sorties/sortie-coffret-figurine-mewtwo-mew-hd.webp",
-      "image_alt": "Coffrets Collection avec figurine 30e anniversaire : Mewtwo et Mew"
+      "image_alt": "Coffrets Collection avec figurine 30e anniversaire : Mew et Mewtwo (visuel commun aux deux coffrets)",
+      "statut": "revendeur",
+      "verifie": "2026-10-26"
+    },
+    {
+      "date": "2026-11-27",
+      "type": "sortie",
+      "titre": "Sortie : Coffret Collection avec figurine Mewtwo",
+      "texte": "30e anniversaire. 5 boosters, 1 carte promo (Mewtwo MEP 104) et 1 figurine de Mewtwo. Initialement annoncé le 6 novembre avec celui de Mew.",
+      "image": "images/sorties/sortie-coffret-figurine-mewtwo-mew-hd.webp",
+      "image_alt": "Coffrets Collection avec figurine 30e anniversaire : Mew et Mewtwo (visuel commun aux deux coffrets)",
+      "statut": "report",
+      "verifie": "2026-10-26",
+      "date_label": "Report possible au 27 novembre 2026 — à confirmer"
     },
     {
       "date": "2026-11-06",
@@ -100,15 +121,30 @@
       "titre": "Sortie : Coffret Collection Premium Métamorph",
       "texte": "30e anniversaire. 8 boosters, 1 carte promo (Métamorph MEP 106) et 1 porte-carte coloré en acrylique.",
       "image": "images/sorties/sortie-coffret-premium-metamorph-hd.webp",
-      "image_alt": "Coffret Collection Premium Métamorph 30e anniversaire"
+      "image_alt": "Coffret Collection Premium Métamorph 30e anniversaire",
+      "statut": "revendeur",
+      "verifie": "2026-10-26"
     },
     {
       "date": "2026-11-06",
       "type": "sortie",
-      "titre": "Sortie : Coffret Collection Ultra-Premium (UPC)",
-      "texte": "30e anniversaire. Deux versions : Journée (Mentali) et Soirée (Noctali).",
+      "titre": "Sortie : Coffret Collection Ultra-Premium Noctali (Soirée)",
+      "texte": "30e anniversaire. Version Soirée (Noctali) de la Collection Ultra-Premium.",
       "image": "images/sorties/sortie-upc-journee-soiree-hd.webp",
-      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Journée (Mentali) et Soirée (Noctali)"
+      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Journée (Mentali) et Soirée (Noctali) (visuel commun aux deux coffrets)",
+      "statut": "revendeur",
+      "verifie": "2026-10-26"
+    },
+    {
+      "date": "2026-11-27",
+      "type": "sortie",
+      "titre": "Sortie : Coffret Collection Ultra-Premium Mentali (Journée)",
+      "texte": "30e anniversaire. Version Journée (Mentali) de la Collection Ultra-Premium. Initialement annoncée le 6 novembre, comme la version Soirée (Noctali).",
+      "image": "images/sorties/sortie-upc-journee-soiree-hd.webp",
+      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Journée (Mentali) et Soirée (Noctali) (visuel commun aux deux coffrets)",
+      "statut": "report",
+      "verifie": "2026-10-26",
+      "date_label": "Report possible au 27 novembre 2026 — à confirmer"
     },
     {
       "date": "2026-10-02",

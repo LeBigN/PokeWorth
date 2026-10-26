@@ -15,11 +15,16 @@
   }
   function tm(n, txt) { var t = el("time", "news-date", txt); t.dateTime = n.date; return t; }
   function isFuture(d) { return daysTo(d) > 0; }
-  function daysTo(d) {
-    var today = new Date(); today.setHours(0, 0, 0, 0);
-    var t = new Date(d + "T00:00:00");
-    return Math.round((t - today) / 86400000);
+  // jour courant en heure de Paris, puis écart en jours calendaires (fiable au changement de mois, d'année et d'heure)
+  function parisDay() {
+    try { return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+    catch (e) { var t = new Date(); return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2) + "-" + ("0" + t.getDate()).slice(-2); }
   }
+  function dayNum(d) { var p = d.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; }
+  function daysTo(d) { return Math.round(dayNum(d) - dayNum(parisDay())); }
+  var STATUT = { confirme: "Confirmé", revendeur: "Annoncé par revendeur", a_confirmer: "À confirmer", report: "Report possible" };
+  function stChip(n) { return n.type === "sortie" && STATUT[n.statut] ? el("span", "tag", STATUT[n.statut]) : null; }
+  function dateTxt(n) { return n.date_label ? n.date_label : fmt(n.date); }
   function chip(n) {
     if (n.type !== "sortie") return null;
     var k = daysTo(n.date);
@@ -77,10 +82,11 @@
     c.appendChild(visual(n, "nh-visual"));
     var b = el("div", "nh-body");
     var left = el("div", "nh-text");
-    left.appendChild(tm(n, fmt(n.date)));
+    left.appendChild(tm(n, dateTxt(n)));
     left.appendChild(titleEl(n, lvl));
     b.appendChild(left);
     var ch = chip(n); if (ch) b.appendChild(ch);
+    var sc = stChip(n); if (sc) b.appendChild(sc);
     c.appendChild(b);
     if (n.texte) c.appendChild(el("p", "nh-desc", n.texte));
     addPoints(c, n);
@@ -92,12 +98,13 @@
     var c = el("article", "news-row");
     c.appendChild(visual(n, "nr-thumb"));
     var t = el("div", "nr-text");
-    t.appendChild(tm(n, fmt(n.date)));
+    t.appendChild(tm(n, dateTxt(n)));
     t.appendChild(titleEl(n, lvl));
     if (n.texte) t.appendChild(el("p", "", n.texte));
     addPoints(t, n);
     c.appendChild(t);
     var ch = chip(n); if (ch) c.appendChild(ch);
+    var sc = stChip(n); if (sc) c.appendChild(sc);
     // bouton « Voir les produits » sur sa propre ligne, pour ne pas être écrasé dans la colonne de texte
     if (hasSerie(n)) { var m = el("div", "nr-more"); m.appendChild(moreLink(n)); c.appendChild(m); }
     if (!hasSerie(n)) addProduits(c, n);
@@ -136,12 +143,15 @@
   }
   function sortDesc(list) {
     function up(n) { return n.type === "sortie" && daysTo(n.date) >= 0; }
-    return list.slice().sort(function (a, b) {
-      if (up(a) !== up(b)) return up(a) ? -1 : 1;
-      if (up(a)) return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
-    });
+    return list.map(function (n, i) { return { n: n, i: i }; }).sort(function (a, b) {
+      var ua = up(a.n), ub = up(b.n);
+      if (ua !== ub) return ua ? -1 : 1;
+      if (a.n.date !== b.n.date) return ua ? (a.n.date < b.n.date ? -1 : 1) : (a.n.date < b.n.date ? 1 : -1);
+      return a.i - b.i;
+    }).map(function (x) { return x.n; });
   }
+  // une sortie passée disparaît des listes dès le lendemain ; elle reste dans les données et sur sa page série
+  function visible(list) { return list.filter(function (n) { return !(n.type === "sortie" && daysTo(n.date) < 0); }); }
 
   function renderSerie(all) {
     var root = document.getElementById("serie-root");
@@ -194,9 +204,10 @@
     fetch("actualites.json", { cache: "no-cache" })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }))
     .then(function (data) {
-      var all = sortDesc(data.actualites || []);
+      var full = sortDesc(data.actualites || []);
+      var all = visible(full);
 
-      if (document.getElementById("serie-root")) renderSerie(all);
+      if (document.getElementById("serie-root")) renderSerie(full);
 
       // accueil : dernières actualités
       var home = document.getElementById("home-news");
