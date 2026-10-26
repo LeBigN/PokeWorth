@@ -165,7 +165,7 @@
         }).map(function (x) { return x.n; });
       };
       var items = compute();
-      var STATUT = { confirme: "Confirmé", revendeur: "Annoncé par revendeur", a_confirmer: "À confirmer", report: "Report possible" };
+      var STATUT = { confirme: "Confirmé", a_confirmer: "À confirmer", report: "Report possible" };
       var catLabel = {}; D.categories.forEach(function (c) { catLabel[c.id] = c.label; });
       var readMin = function (n) {
         var t = [n.titre, n.texte].concat(n.points || []).concat((n.produits || []).map(function (p) { return (p.nom || "") + " " + (p.detail || ""); })).join(" ");
@@ -201,7 +201,7 @@
       var foot = function (n) {
         var f = el("div", "nc-foot");
         var t = el("time", "", n.date_label ? n.date_label : (n.type === "sortie" && daysTo(n.date) > 0 ? "Sortie le " : "") + fmt(n.date)); t.dateTime = n.date;
-        f.appendChild(t); f.appendChild(el("span", "", readMin(n) + " min de lecture"));
+        f.appendChild(t);
         return f;
       };
       var title = function (n, lvl) {

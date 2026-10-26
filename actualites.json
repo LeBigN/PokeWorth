@@ -128,20 +128,20 @@
     {
       "date": "2026-11-06",
       "type": "sortie",
-      "titre": "Sortie : Coffret Collection Ultra-Premium Noctali (Soirée)",
-      "texte": "30e anniversaire. Version Soirée (Noctali) de la Collection Ultra-Premium.",
+      "titre": "Sortie : Coffret Collection Ultra-Premium Noctali (Nuit)",
+      "texte": "30e anniversaire. Version Nuit (Noctali) de la Collection Ultra-Premium.",
       "image": "images/sorties/sortie-upc-journee-soiree-hd.webp",
-      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Journée (Mentali) et Soirée (Noctali) (visuel commun aux deux coffrets)",
+      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Jour (Mentali) et Nuit (Noctali) (visuel commun aux deux coffrets)",
       "statut": "revendeur",
       "verifie": "2026-10-26"
     },
     {
       "date": "2026-11-27",
       "type": "sortie",
-      "titre": "Sortie : Coffret Collection Ultra-Premium Mentali (Journée)",
-      "texte": "30e anniversaire. Version Journée (Mentali) de la Collection Ultra-Premium. Initialement annoncée le 6 novembre, comme la version Soirée (Noctali).",
+      "titre": "Sortie : Coffret Collection Ultra-Premium Mentali (Jour)",
+      "texte": "30e anniversaire. Version Jour (Mentali) de la Collection Ultra-Premium. Initialement annoncée le 6 novembre, comme la version Nuit (Noctali).",
       "image": "images/sorties/sortie-upc-journee-soiree-hd.webp",
-      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Journée (Mentali) et Soirée (Noctali) (visuel commun aux deux coffrets)",
+      "image_alt": "Coffrets Collection Ultra-Premium 30e anniversaire : Jour (Mentali) et Nuit (Noctali) (visuel commun aux deux coffrets)",
       "statut": "report",
       "verifie": "2026-10-26",
       "date_label": "Report possible au 27 novembre 2026 — à confirmer"

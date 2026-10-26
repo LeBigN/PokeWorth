@@ -22,7 +22,7 @@
   }
   function dayNum(d) { var p = d.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000; }
   function daysTo(d) { return Math.round(dayNum(d) - dayNum(parisDay())); }
-  var STATUT = { confirme: "Confirmé", revendeur: "Annoncé par revendeur", a_confirmer: "À confirmer", report: "Report possible" };
+  var STATUT = { confirme: "Confirmé", a_confirmer: "À confirmer", report: "Report possible" };
   function stChip(n) { return n.type === "sortie" && STATUT[n.statut] ? el("span", "tag", STATUT[n.statut]) : null; }
   function dateTxt(n) { return n.date_label ? n.date_label : fmt(n.date); }
   function chip(n) {
