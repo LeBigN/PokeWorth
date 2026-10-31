@@ -65,7 +65,7 @@
   // ---------- onglets
   function panelCartes(p) {
     if (state.lang === "jp") {
-      p.appendChild(empty("Aucune série japonaise importée", ["Aucune source de données japonaise n'est connectée à PokeWorth pour le moment. Les séries et cartes japonaises ne sont donc pas affichées, plutôt que de présenter un catalogue incomplet."]));
+      p.appendChild(empty("Aucune série japonaise importée", ["Aucune source de données japonaise n'est connectée à Pokéworth pour le moment. Les séries et cartes japonaises ne sont donc pas affichées, plutôt que de présenter un catalogue incomplet."]));
       return;
     }
     var list = el("div", "cat-list");
@@ -132,7 +132,7 @@
   }
   function panelPokedex(p) {
     p.appendChild(empty("Pokédex non disponible", [
-      "Aucune base de Pokémon n'est importée dans PokeWorth. Le Pokédex (noms français et japonais, numéro national) sera affiché dès qu'une source dont la licence autorise cet usage sera connectée.",
+      "Aucune base de Pokémon n'est importée dans Pokéworth. Le Pokédex (noms français et japonais, numéro national) sera affiché dès qu'une source dont la licence autorise cet usage sera connectée.",
       "Poképédia et Bulbapedia sont publiées sous licence non commerciale : leur contenu n'est pas importé."
     ]));
     var a = el("a", "cta ghost", "Voir les sources des données"); a.href = "sources-des-donnees.html"; p.appendChild(a);
