@@ -1527,3 +1527,6 @@ body .pill-soon,body .pill-app,body .plan-flag{background:rgba(139,108,240,.18)!
 .nav-sub{background:#17171d;border:1px solid rgba(255,255,255,.10);box-shadow:0 24px 48px -20px rgba(0,0,0,.9);-webkit-backdrop-filter:none;backdrop-filter:none}
 @media (max-width:959px){.nav .nav-sub{background:none!important;border:0!important;box-shadow:none!important}}
 .browser{background:linear-gradient(180deg,#1b1b22,#121217);border:1px solid rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 34px 70px -28px rgba(0,0,0,.9)}
+
+/* v14.3 · bulle « Meilleure offre annuelle » : fond plein pour masquer le trait de la carte derrière */
+body .plan-flag{background:#3b2f6c!important;background-image:none!important;border-color:rgba(185,163,255,.5)!important}
