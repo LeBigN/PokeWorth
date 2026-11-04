@@ -1530,3 +1530,31 @@ body .pill-soon,body .pill-app,body .plan-flag{background:rgba(139,108,240,.18)!
 
 /* v14.3 · bulle « Meilleure offre annuelle » : fond plein pour masquer le trait de la carte derrière */
 body .plan-flag{background:#3b2f6c!important;background-image:none!important;border-color:rgba(185,163,255,.5)!important}
+
+/* v14.4 · mobile : tableaux des pages d'information en fiches, lecture des pages légales plus aérée */
+@media (max-width:640px){
+  .tbl:has(table.rsp){overflow:visible;background:none;border:0;border-radius:0}
+  .tbl table.rsp{min-width:0;width:100%;font-size:15px;display:block}
+  .tbl table.rsp thead,.tbl table.rsp tr:has(>th){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .tbl table.rsp tbody,.tbl table.rsp tr,.tbl table.rsp td{display:block;width:auto}
+  .tbl table.rsp tbody{display:grid;gap:10px}
+  .tbl table.rsp tr{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035)}
+  .tbl table.rsp td{padding:0;border:0;line-height:1.5}
+  .tbl table.rsp td:first-child{color:#fff;font-weight:700;margin-bottom:2px}
+  .tbl table.rsp td+td{margin-top:8px}
+  .tbl table.rsp td[data-l]::before{content:attr(data-l);display:block;margin-bottom:1px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .tbl table.rsp tr:first-child td:first-child:only-child{margin:0}
+  /* pages légales : moins de marges cumulées, texte plus large */
+  .wrap.doc{width:calc(100% - 24px);padding-top:16px}
+  .doc .card{padding:20px 16px;border-radius:20px}
+  .doc h1{font-size:26px;letter-spacing:-.6px}
+  .doc h2{font-size:19px;margin:24px 0 6px;padding-top:18px;border-top:1px solid var(--line)}
+  .doc h2:first-of-type{border-top:0;padding-top:0}
+  .doc p,.doc li{font-size:15.5px;line-height:1.6}
+  .doc ul{margin-left:18px}
+  .doc .callout{padding:14px 16px;border-radius:16px;margin:14px 0}
+}
+@media (max-width:640px){
+  .tbl table.rsp td:first-child{font-weight:500}
+  .tbl table.rsp.t td:first-child{font-weight:700}
+}
